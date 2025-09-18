@@ -5,7 +5,7 @@ import Vehicle from "@/models/Vehicle";
 export async function GET() {
   try {
     await dbConnect();
-    const items = await Vehicle.find({}).populate("CompanyId");
+    const items = await Vehicle.find({}).populate("companyId");
     return NextResponse.json(items);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
