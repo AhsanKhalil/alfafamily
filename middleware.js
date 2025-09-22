@@ -6,7 +6,7 @@ export function middleware(req) {
 
   // Public APIs (login, register, otp, etc.)
   if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/otp")
-  || pathname.startsWith("/api/companies") || pathname.startsWith("/api/vehicles")
+  || pathname.startsWith("/api/companies") || pathname.startsWith("/api/vehicles") || pathname.startsWith("/api/employees")
   ) {
     return NextResponse.next();
   }
