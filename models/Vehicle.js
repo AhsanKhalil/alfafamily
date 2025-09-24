@@ -8,7 +8,7 @@ const VehicleSchema = new mongoose.Schema({
   registrationNo: String,
   seatCount: Number,
   picture: String,
-  companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
+  companyid: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
   isActive: { type: Boolean, default: true },
   createdOn: { type: Date, default: Date.now },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

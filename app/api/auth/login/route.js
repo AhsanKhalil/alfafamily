@@ -1,13 +1,12 @@
-export const runtime = 'nodejs'
+export const runtime = "nodejs";
 
 import dbConnect from "@/lib/mongodb";
 import ApiUser from "@/models/ApiUser";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { SignJWT } from "jose";
 
 export async function POST(req) {
   const { username, password } = await req.json();
-
   await dbConnect();
 
   const user = await ApiUser.findOne({ username });
@@ -20,17 +19,15 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 401 });
   }
 
-
-  console.log("userId:", user._id);
-console.log("username:", user.username);
-console.log("process.env.JWT_SECRET:", process.env.JWT_SECRET);
-
-
-  const token = jwt.sign(
-    { userId: user._id, username: user.username },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
-  );
+  // Generate JWT using jose
+  const token = await new SignJWT({
+    userId: user._id.toString(),
+    companyid: user.companyid || null,
+    username: user.username,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
   return new Response(JSON.stringify({ token }), { status: 200 });
 }

@@ -1,37 +1,86 @@
-import { NextResponse } from "next/server";
+export const runtime = "nodejs";
+
 import dbConnect from "@/lib/mongodb";
 import Employee from "@/models/Employee";
+import Company from "@/models/Company";
+import { authMiddleware } from "@/lib/auth";
 
 export async function GET(req, { params }) {
+  await dbConnect();
+
+  const user = await authMiddleware(req);
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+  }
+
+  const { id } = params;
+
   try {
-    await dbConnect();
-    const item = await Employee.findById(params.id).populate("CompanyId");
-    if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(item);
+    const employee = await Employee.findById(id).populate("companyId", "name");
+    if (!employee) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
+
+    // Check if employee belongs to user's company
+    if (employee.companyId._id.toString() !== user.companyid) {
+      return new Response(JSON.stringify({ error: "Access denied" }), { status: 403 });
+    }
+
+    return new Response(JSON.stringify(employee), { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Error fetching employee:", err);
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
 
-export async function PUT(req, { params }) {
+export async function PATCH(req, { params }) {
+  await dbConnect();
+
+  const user = await authMiddleware(req);
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+  }
+
+  const { id } = params;
+
   try {
-    await dbConnect();
     const body = await req.json();
-    const updated = await Employee.findByIdAndUpdate(params.id, body, { new: true });
-    if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(updated);
+
+    // Ensure employee belongs to user's company
+    const employee = await Employee.findById(id);
+    if (!employee) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
+    if (employee.companyId.toString() !== user.companyid) {
+      return new Response(JSON.stringify({ error: "Access denied" }), { status: 403 });
+    }
+
+    // Update employee
+    const updated = await Employee.findByIdAndUpdate(id, body, { new: true });
+    return new Response(JSON.stringify(updated), { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    console.error("Error updating employee:", err);
+    return new Response(JSON.stringify({ error: err.message }), { status: 400 });
   }
 }
 
 export async function DELETE(req, { params }) {
+  await dbConnect();
+
+  const user = await authMiddleware(req);
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+  }
+
+  const { id } = params;
+
   try {
-    await dbConnect();
-    const deleted = await Employee.findByIdAndDelete(params.id);
-    if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ message: "Deleted" });
+    const employee = await Employee.findById(id);
+    if (!employee) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
+    if (employee.companyId.toString() !== user.companyid) {
+      return new Response(JSON.stringify({ error: "Access denied" }), { status: 403 });
+    }
+
+    await Employee.findByIdAndDelete(id);
+    return new Response(JSON.stringify({ message: "Deleted successfully" }), { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Error deleting employee:", err);
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }

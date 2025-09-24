@@ -20,7 +20,10 @@ if (!MONGODB_URI) {
 
     const username = process.env.API_USER_USERNAME;
     const plainPassword = process.env.API_USER_PASSWORD;
+    const companyid = process.env.COMPANY_ID;
 
+    console.log("COMPANY_ID from env:", companyid);
+    
     if (!username || !plainPassword) {
       console.error("Please define API_USER_USERNAME and API_USER_PASSWORD in .env.local");
       process.exit(1);
@@ -38,6 +41,7 @@ if (!MONGODB_URI) {
 
     // Create new user
     const newUser = new ApiUser({
+      companyid,
       username,
       password: hashedPassword,
       isActive: true,
