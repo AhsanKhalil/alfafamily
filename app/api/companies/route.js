@@ -1,24 +1,32 @@
-import { NextResponse } from "next/server";
+export const runtime = "nodejs";  // ✅ force Node runtime
+
 import dbConnect from "@/lib/mongodb";
 import Company from "@/models/Company";
+import { authMiddleware } from "@/lib/auth";
 
-export async function GET() {
-  try {
-    await dbConnect();
-    const items = await Company.find({});
-    return NextResponse.json(items);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+export async function GET(req) {
+  await dbConnect();
+
+  const user = await authMiddleware(req);
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
   }
+
+  const companies = await Company.find();
+  return new Response(JSON.stringify(companies), { status: 200 });
 }
 
 export async function POST(req) {
-  try {
-    await dbConnect();
-    const body = await req.json();
-    const created = await Company.create(body);
-    return NextResponse.json(created, { status: 201 });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  await dbConnect();
+
+  const user = await authMiddleware(req);
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
   }
+
+  const body = await req.json();
+  const company = new Company(body);
+  await company.save();
+
+  return new Response(JSON.stringify(company), { status: 201 });
 }
