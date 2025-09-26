@@ -7,7 +7,8 @@ const PoolingRequestMemberSchema = new mongoose.Schema({
   joinedOn: { type: Date, default: Date.now },
   status: String,
   isPrimaryRider: { type: Boolean, default: false },
-  notes: String
+  notes: String,
+  isaccepted: { type: Boolean, default: false },  
 });
 
 export default mongoose.models.PoolingRequestMember || mongoose.model("PoolingRequestMember", PoolingRequestMemberSchema);

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Otp from "@/models/Otp";
-
+import { authMiddleware } from "@/lib/auth";
 export async function GET(req, { params }) {
   try {
     await dbConnect();

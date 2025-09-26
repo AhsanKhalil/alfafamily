@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import PoolingRequest from "@/models/PoolingRequest";
-
+import { authMiddleware } from "@/lib/auth";
 export async function GET(req, { params }) {
   try {
     await dbConnect();
+
+
+    const user = await authMiddleware(req);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+      }
+
     const item = await PoolingRequest.findById(params.id).populate("UserId DriverId VehicleId");
     if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(item);

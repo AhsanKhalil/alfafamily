@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
+import { string } from "yup";
 
 const PoolingRequestSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  driverId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  userId: { type: String, ref: "User", required: true },
   vehicleId: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" },
   pickupLocation: String,
   dropoffLocation: String,

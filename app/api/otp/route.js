@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Otp from "@/models/Otp";
-
+import { authMiddleware } from "@/lib/auth";
 export async function GET() {
   try {
     await dbConnect();
+    const user = await authMiddleware(req);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+      }
     const items = await Otp.find({}).populate("UserId");
     return NextResponse.json(items);
   } catch (err) {
@@ -15,6 +19,10 @@ export async function GET() {
 export async function POST(req) {
   try {
     await dbConnect();
+    const user = await authMiddleware(req);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+      }
     const body = await req.json();
     const created = await Otp.create(body);
     return NextResponse.json(created, { status: 201 });

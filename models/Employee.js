@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const EmployeeSchema = new mongoose.Schema({
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
+  empid: { type: String, required: true, unique: true },
   firstName: String,
   lastName: String,
   address: String,

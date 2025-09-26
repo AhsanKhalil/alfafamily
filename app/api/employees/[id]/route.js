@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
   const { id } = params;
 
   try {
-    const employee = await Employee.findById(id).populate("companyId", "name");
+    const employee = await Employee.findOne({empid: id }).populate("companyId", "name");
     if (!employee) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
 
     // Check if employee belongs to user's company
