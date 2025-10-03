@@ -13,7 +13,9 @@ const VehicleSchema = new mongoose.Schema({
   createdOn: { type: Date, default: Date.now },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   modifiedOn: Date,
-  modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+  modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
 });
 
 export default mongoose.models.Vehicle || mongoose.model("Vehicle", VehicleSchema);

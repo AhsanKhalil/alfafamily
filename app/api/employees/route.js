@@ -8,14 +8,15 @@ import { authMiddleware } from "@/lib/auth";
 export async function GET(req) {
   await dbConnect();
 
-  const user = await authMiddleware(req);
-  if (!user) {
-    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-  }
+  // const user = await authMiddleware(req);
+  // if (!user) {
+  //   return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+  // }
 
   try {
     // Fetch all employees for the user's company
-    const employees = await Employee.find({ companyId: user.companyid }).populate("companyId", "name");
+    //const employees = await Employee.find({ companyId: user.companyid }).populate("companyId", "name");
+        const employees = await Employee.find();
 
     return new Response(JSON.stringify(employees), { status: 200 });
   } catch (error) {

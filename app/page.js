@@ -1,4 +1,6 @@
+// app/page.js
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -29,12 +31,20 @@ export default function HomePage() {
           </ul>
 
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-6">
-            <button className="px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-semibold shadow-lg transition-all">
+            {/* Use Link to navigate to register driver page */}
+            <Link
+              href="/register/driver"
+              className="inline-block px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-semibold shadow-lg transition-all text-center"
+            >
               Register as Driver
-            </button>
-            <button className="px-6 py-3 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-semibold shadow-lg transition-all">
+            </Link>
+
+            <Link
+              href="/register/rider"
+              className="inline-block px-6 py-3 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-semibold shadow-lg transition-all text-center"
+            >
               Register as Rider
-            </button>
+            </Link>
           </div>
         </div>
 

@@ -6,7 +6,12 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
   // Allow public routes (login, register, etc.)
-  if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/otp")) {
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/otp") 
+  || pathname.startsWith("/api/roles") 
+|| pathname.startsWith("/api/employees") 
+|| pathname.startsWith("/api/register-driver") 
+  
+  ) {
     return NextResponse.next();
   }
 
