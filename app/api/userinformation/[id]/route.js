@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import UserInformation from "@/models/UserInformation";
 
+
 export async function GET(req, { params }) {
   try {
     await dbConnect();
@@ -9,13 +10,21 @@ export async function GET(req, { params }) {
       if (!user) {
         return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
       }
-    const item = await UserInformation.findById(params.id).populate("UserId");
-    if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(item);
+    const { id } = params;
+
+    const userInfo = await UserInformation.findOne({ userId: id });
+
+    if (!userInfo) {
+      return NextResponse.json({ message: "User info not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(userInfo, { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
 
 export async function PUT(req, { params }) {
   try {
