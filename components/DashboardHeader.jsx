@@ -39,7 +39,7 @@ export default function DashboardHeader({ username = "Ahsan" }) {
             <Link href="/profile" className="block px-4 py-2 hover:bg-gray-700 cursor-pointer"> Profile</Link>
             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Change Password</li>
             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Activity</li>
-            <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Logout</li>
+            <Link href="/login" className="block px-4 py-2 hover:bg-gray-700 cursor-pointer"> Logout</Link>
           </ul>
         </div>
       </div>
