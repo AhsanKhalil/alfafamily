@@ -1,7 +1,7 @@
 
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import PoolingRequest from "@/models/PoolingRequests";
+import PoolingRequest from "@/models/PoolingRequest";
 import { authMiddleware } from "@/lib/auth";
 import Employee from "@/models/Employee";
 import Vehicle from "@/models/Vehicle";

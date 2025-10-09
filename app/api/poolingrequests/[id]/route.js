@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import PoolingRequest from "@/models/PoolingRequests";
+import PoolingRequest from "@/models/PoolingRequest";
 import { authMiddleware } from "@/lib/auth";
 
 // GET single pooling request by ID
