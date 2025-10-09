@@ -38,10 +38,10 @@ export async function GET() {
 export async function POST(req) {
   try {
     await dbConnect();
-     const user = await authMiddleware(req);
+    /*  const user = await authMiddleware(req);
       if (!user) {
         return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-      }
+      } */
     const body = await req.json();
 
     const { userId, whatsAppNo1, mobileNo1, address1, email, imagePath } = body;

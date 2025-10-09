@@ -6,11 +6,11 @@ import UserInformation from "@/models/UserInformation";
 export async function GET(req, { params }) {
   try {
     await dbConnect();
-    const user = await authMiddleware(req);
+    /* const user = await authMiddleware(req);
       if (!user) {
         return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
       }
-    const { id } = params;
+ */    const { id } = params;
 
     const userInfo = await UserInformation.findOne({ userId: id });
 
