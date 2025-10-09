@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DriverDashboard from "./DriverDashboard";
-import RiderDashboard from "./RiderDashboard";
+import dynamic from "next/dynamic";
+
+const DriverDashboard = dynamic(() => import("./DriverDashboard"), { ssr: false });
+const RiderDashboard = dynamic(() => import("./RiderDashboard"), { ssr: false });
 
 export default function DashboardPage() {
   const [role, setRole] = useState(null);
@@ -10,23 +12,17 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchUserRole() {
       try {
-        // Get userId from localStorage (set at login)
-        const userId = localStorage.getItem("userId");
+        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
         if (!userId) return;
 
-        // Fetch user info from API
         const res = await fetch(`/api/users/${userId}`);
         const data = await res.json();
 
-        console.log(res);
-
-        if (res.ok) {
-          setRole(data.roleId?.name?.toLowerCase()); // e.g., "driver" or "rider"
-        } else {
-          console.error("Failed to fetch user role:", data.error);
+        if (res.ok && data.roleId?.name) {
+          setRole(data.roleId.name.toLowerCase());
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching role:", err);
       }
     }
 
@@ -35,14 +31,14 @@ export default function DashboardPage() {
 
   if (!role) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
         Loading dashboard...
       </div>
     );
   }
-console.log(role);
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-black text-white">
       {role === "driver" ? <DriverDashboard /> : <RiderDashboard />}
     </div>
   );

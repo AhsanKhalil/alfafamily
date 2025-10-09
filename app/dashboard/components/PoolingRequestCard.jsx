@@ -1,3 +1,5 @@
+"use client";
+
 export default function PoolingRequestCard({ request }) {
   return (
     <div className="bg-gray-800 p-4 rounded-lg shadow hover:shadow-lg transition">

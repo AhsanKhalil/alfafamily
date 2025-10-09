@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import axios from "axios";
+import dynamic from "next/dynamic";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
-import PoolingMap from "./PoolingMap";
+
+// ✅ Lazy-load map component (no SSR)
+const PoolingMap = dynamic(() => import("./PoolingMap"), { ssr: false });
 
 export default function NewPoolingRequestForm({ onSubmit }) {
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [poolTime, setPoolTime] = useState(null);
   const [totalSeats, setTotalSeats] = useState(1);
-  const [showMapFor, setShowMapFor] = useState(null); // "pickup" | "dropoff"
+  const [showMapFor, setShowMapFor] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +24,6 @@ export default function NewPoolingRequestForm({ onSubmit }) {
     }
 
     try {
-      const userId = localStorage.getItem("userId"); // your userId from login
       const body = {
         pickupLocation: pickup,
         dropoffLocation: dropoff,
@@ -30,11 +32,10 @@ export default function NewPoolingRequestForm({ onSubmit }) {
         availableSeats: totalSeats,
       };
 
-      // Create pooling request
       const res = await axios.post("/api/poolingrequests", body);
       if (res.data.success) {
         alert("Pooling request created successfully!");
-        onSubmit(); // notify parent to refresh
+        onSubmit();
         setPickup("");
         setDropoff("");
         setPoolTime(null);
@@ -47,33 +48,28 @@ export default function NewPoolingRequestForm({ onSubmit }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-gray-800 p-6 rounded-lg shadow-lg text-white"
-    >
-      <h3 className="text-xl font-bold text-green-400 mb-4">New Pooling Request</h3>
+    <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-xl shadow-lg text-white">
+      <h3 className="text-lg font-semibold text-green-400 mb-4">Create New Request</h3>
 
       <div className="mb-4">
-        <label className="block mb-1">Pickup Location</label>
         <input
           type="text"
           value={pickup}
           readOnly
           onClick={() => setShowMapFor("pickup")}
           placeholder="Click to select pickup location"
-          className="w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500"
         />
       </div>
 
       <div className="mb-4">
-        <label className="block mb-1">Dropoff Location</label>
         <input
           type="text"
           value={dropoff}
           readOnly
           onClick={() => setShowMapFor("dropoff")}
           placeholder="Click to select dropoff location"
-          className="w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500"
         />
       </div>
 
@@ -82,30 +78,29 @@ export default function NewPoolingRequestForm({ onSubmit }) {
           key={showMapFor}
           onSelectLocation={(address) => {
             if (showMapFor === "pickup") setPickup(address);
-            else if (showMapFor === "dropoff") setDropoff(address);
-            setShowMapFor(null); // close map
+            else setDropoff(address);
+            setShowMapFor(null);
           }}
         />
       )}
 
       <div className="mb-4">
-        <label className="block mb-1">Pool Time</label>
         <Datetime
           value={poolTime}
           onChange={(date) => setPoolTime(date)}
           inputProps={{
+            placeholder: "Select pool time",
             className:
-              "w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-white",
+              "w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 text-white",
           }}
         />
       </div>
 
       <div className="mb-4">
-        <label className="block mb-1">Total Seats</label>
         <select
           value={totalSeats}
           onChange={(e) => setTotalSeats(parseInt(e.target.value))}
-          className="w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-white"
+          className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 text-white"
         >
           {[1, 2, 3, 4].map((n) => (
             <option key={n} value={n}>
@@ -117,7 +112,7 @@ export default function NewPoolingRequestForm({ onSubmit }) {
 
       <button
         type="submit"
-        className="w-full py-2 rounded-lg bg-green-500 hover:bg-green-600 text-black font-semibold transition"
+        className="w-full py-2 bg-green-500 hover:bg-green-600 text-black rounded-lg font-semibold transition"
       >
         Create Request
       </button>
