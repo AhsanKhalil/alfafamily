@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import Employee from "./Employee";  
+import Role from "./Role";          
+import Vehicle from "./Vehicle";
 
 const UserSchema = new mongoose.Schema({
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },

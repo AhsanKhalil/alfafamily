@@ -9,7 +9,7 @@ export async function middleware(req) {
   if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/otp") || pathname.startsWith("/api/userinformation") 
   || pathname.startsWith("/api/roles") 
 || pathname.startsWith("/api/employees") 
-|| pathname.startsWith("/api/register-driver") 
+|| pathname.startsWith("/api/register-driver") || pathname.startsWith("/api/user")
   
   ) {
     return NextResponse.next();

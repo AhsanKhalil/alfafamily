@@ -1,5 +1,7 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
+
 
 export default function DashboardHeader({ username = "Ahsan" }) {
   return (
@@ -33,7 +35,8 @@ export default function DashboardHeader({ username = "Ahsan" }) {
           </button>
           {/* Dropdown */}
           <ul className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-            <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Profile</li>
+            {/* <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Profile</li> */}
+            <Link href="/profile" className="block px-4 py-2 hover:bg-gray-700 cursor-pointer"> Profile</Link>
             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Change Password</li>
             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Activity</li>
             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Logout</li>
