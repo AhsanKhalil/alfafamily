@@ -11,10 +11,10 @@ export async function GET(req) {
   try {
     await dbConnect();
 
-    const user = await authMiddleware(req);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    // const user = await authMiddleware(req);
+    // if (!user) {
+    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    // }
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");

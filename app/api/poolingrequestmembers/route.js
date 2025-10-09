@@ -9,11 +9,11 @@ export async function GET(req) {
   try {
     await dbConnect();
 
-    const user = await authMiddlewa
-    re(req);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    // const user = await authMiddlewa
+    // re(req);
+    // if (!user) {
+    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    // }
 
     const { searchParams } = new URL(req.url);
     const poolingRequestId = searchParams.get("poolingRequestId");

@@ -7,30 +7,59 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState(""); // changed from username to userId
   const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Bypass backend validation: accept provided username/password,
-    // then prompt user for OTP and proceed to dashboard if OTP entered.
+    if (!userId || !password) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please enter User ID and Password",
+        background: "#111827",
+        color: "#fff",
+        confirmButtonColor: "#16a34a",
+      });
+      return;
+    }
+
     try {
+      // Call API to login
+      const res = await fetch("/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: data.error || "Invalid credentials",
+          background: "#111827",
+          color: "#fff",
+          confirmButtonColor: "#16a34a",
+        });
+        return;
+      }
+
+      // OTP prompt after successful login
       const { value: otp, isConfirmed } = await Swal.fire({
         title: "Enter OTP",
         input: "text",
-        inputLabel: "We sent an OTP to your email",
+        inputLabel: "We sent an OTP to your registered email",
         inputPlaceholder: "Enter your OTP",
         showCancelButton: true,
         confirmButtonText: "Verify",
         background: "#111827",
         color: "#fff",
-        confirmButtonColor: "#16a34a", // green
-        inputAttributes: {
-          autocapitalize: "off",
-          autocorrect: "off",
-        },
+        confirmButtonColor: "#16a34a",
+        inputAttributes: { autocapitalize: "off", autocorrect: "off" },
         didOpen: () => {
           const input = Swal.getInput();
           if (input) input.focus();
@@ -38,12 +67,11 @@ export default function LoginPage() {
       });
 
       if (isConfirmed) {
-        // Save token/username in localStorage to represent logged-in state
-        // (backend validation is intentionally bypassed per request)
+        // Save a mock token to localStorage
         const token = "token-" + Date.now();
         try {
           localStorage.setItem("token", token);
-          localStorage.setItem("username", username || "");
+          localStorage.setItem("userId", userId);
         } catch (err) {
           // ignore storage errors
         }
@@ -57,9 +85,11 @@ export default function LoginPage() {
           confirmButtonColor: "#16a34a",
         });
 
+
+        localStorage.setItem("userId", data.user._id);
+        
         router.push("/dashboard");
       } else {
-        // user cancelled OTP
         await Swal.fire({
           icon: "info",
           title: "Cancelled",
@@ -69,8 +99,15 @@ export default function LoginPage() {
         });
       }
     } catch (err) {
-      console.error("Login/OTP error:", err);
-      Swal.fire("Error", "Something went wrong. Please try again.", "error");
+      console.error("Login error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong. Please try again.",
+        background: "#111827",
+        color: "#fff",
+        confirmButtonColor: "#16a34a",
+      });
     }
   };
 
@@ -96,13 +133,13 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm mb-2">Username</label>
+              <label className="block text-sm mb-2">User ID</label>
               <input
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 outline-none text-white"
-                placeholder="Enter your username"
+                placeholder="Enter your User ID"
                 required
               />
             </div>

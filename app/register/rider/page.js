@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
 
-export default function RegisterDriver() {
+export default function RegisterRider() {
   const [employees, setEmployees] = useState([]);
   const [employeeId, setEmployeeId] = useState("");
   const [employeeData, setEmployeeData] = useState({
@@ -16,27 +16,18 @@ export default function RegisterDriver() {
     cnic: "",
   });
 
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [roleId] = useState("68e79c72e60358a66e60d167"); // Rider RoleId
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [roleId] = useState("68e79c68e60358a66e60d165"); // Driver Role ID fixed
-
-  const [vehicle, setVehicle] = useState({
-    type: "",
-    name: "",
-    model: "",
-    color: "",
-    registrationNo: "",
-    seatCount: "",
-  });
 
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState("");
+
   const router = useRouter();
 
-  // ✅ Validation Schema
   const validationSchema = Yup.object().shape({
     userId: Yup.string().required("User ID is required"),
     password: Yup.string()
@@ -51,21 +42,20 @@ export default function RegisterDriver() {
       .required("Confirm Password is required"),
   });
 
-  // ✅ Fetch Employees
+  // Fetch employees
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const empRes = await fetch("/api/employees");
-        const empData = await empRes.json();
-        setEmployees(Array.isArray(empData) ? empData : []);
+        const res = await fetch("/api/employees");
+        const data = await res.json();
+        setEmployees(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Error loading employees:", err);
+        console.error(err);
       }
     }
     fetchEmployees();
   }, []);
 
-  // ✅ Handle employee select
   const handleEmployeeSelect = (id) => {
     setEmployeeId(id);
     if (!id) {
@@ -79,7 +69,6 @@ export default function RegisterDriver() {
       });
       return;
     }
-
     const emp = employees.find((e) => e._id === id);
     if (emp) {
       setEmployeeData({
@@ -93,7 +82,6 @@ export default function RegisterDriver() {
     }
   };
 
-  // ✅ Check if User Exists (employeeId + userId)
   const checkUserExists = async (empId, userId) => {
     if (!empId || !userId) return false;
     try {
@@ -105,20 +93,8 @@ export default function RegisterDriver() {
     }
   };
 
-  // ✅ Vehicle input change
-  const handleVehicleChange = (e) => {
-    setVehicle({ ...vehicle, [e.target.name]: e.target.value });
-  };
-
-  // ✅ Continue Button → OTP Modal
   const handleContinue = async (e) => {
     e.preventDefault();
-
-    if (!employeeId) {
-      Swal.fire("Error", "Please select an employee.", "error");
-      return;
-    }
-
     try {
       await validationSchema.validate({ userId, password, confirmPassword }, { abortEarly: false });
     } catch (err) {
@@ -132,10 +108,14 @@ export default function RegisterDriver() {
       return;
     }
 
+    if (!employeeId) {
+      Swal.fire("Error", "Please select an employee.", "error");
+      return;
+    }
+
     const maskedEmail =
-      employeeData.email?.replace(/^(.{3})(.*)(@.*)$/, (_, a, b, c) =>
-        a + "*".repeat(b.length) + c
-      ) || "your email";
+      employeeData.email?.replace(/^(.{3})(.*)(@.*)$/, (_, a, b, c) => a + "*".repeat(b.length) + c) ||
+      "your email";
 
     Swal.fire(
       "OTP Sent",
@@ -146,7 +126,6 @@ export default function RegisterDriver() {
     setShowOTPModal(true);
   };
 
-  // ✅ Submit after OTP Verification
   const handleOTPSubmit = async () => {
     if (otp !== "1234") {
       Swal.fire("Invalid OTP", "Please try again!", "error");
@@ -154,13 +133,12 @@ export default function RegisterDriver() {
     }
 
     try {
-      const res = await fetch("/api/register-driver", {
+      const res = await fetch("/api/register-rider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           employeeId,
           employeeData,
-          vehicle,
           userId,
           userName: employeeData.firstName + " " + employeeData.lastName,
           password,
@@ -171,10 +149,10 @@ export default function RegisterDriver() {
       const result = await res.json();
 
       if (res.ok) {
-        Swal.fire("Success", "Driver registered successfully!", "success");
+        Swal.fire("Success", "Rider registered successfully!", "success");
         router.push("/login");
       } else {
-        Swal.fire("Error", result.error || "Failed to save driver data.", "error");
+        Swal.fire("Error", result.error || "Failed to save rider data.", "error");
       }
     } catch (err) {
       Swal.fire("Error", "Something went wrong.", "error");
@@ -183,17 +161,15 @@ export default function RegisterDriver() {
 
   return (
     <main className="bg-black text-white min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-5xl bg-gray-900 rounded-2xl shadow-2xl p-10 space-y-6">
+      <div className="w-full max-w-3xl bg-gray-900 rounded-2xl shadow-2xl p-10 space-y-6">
         <h1 className="text-3xl font-bold text-green-400 mb-4 text-center">
-          🚗 Register as Driver
+          🏍 Register as Rider
         </h1>
 
         <form onSubmit={handleContinue} className="space-y-6">
           {/* Employee Dropdown */}
           <div>
-            <label className="block text-yellow-400 mb-2 font-semibold">
-              Select Employee
-            </label>
+            <label className="block text-yellow-400 mb-2 font-semibold">Select Employee</label>
             <select
               value={employeeId}
               onChange={(e) => handleEmployeeSelect(e.target.value)}
@@ -218,7 +194,7 @@ export default function RegisterDriver() {
           </div>
 
           {/* User ID & Password */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 relative">
             <input
               type="text"
               value={userId}
@@ -227,8 +203,6 @@ export default function RegisterDriver() {
               className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400"
               required
             />
-
-            {/* Password Field with Icon */}
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -245,8 +219,6 @@ export default function RegisterDriver() {
                 {showPassword ? "👁️" : "🙈"}
               </span>
             </div>
-
-            {/* Confirm Password Field with Icon */}
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -265,65 +237,9 @@ export default function RegisterDriver() {
             </div>
           </div>
 
-          {/* Vehicle Details */}
-          <h2 className="text-2xl font-semibold text-green-400 mt-6">
-            Vehicle Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            <select
-              name="type"
-              value={vehicle.type}
-              onChange={handleVehicleChange}
-              className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400"
-            >
-              <option value="">Select Vehicle Type</option>
-              {["Car","Bike","Van","Rikshaw","Bus","Pickup","Jeep","ElectricCar"].map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            <input name="name" value={vehicle.name} onChange={handleVehicleChange} placeholder="Vehicle Name" className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400" />
-            <select
-              name="model"
-              value={vehicle.model}
-              onChange={handleVehicleChange}
-              className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400"
-            >
-              <option value="">Select Model</option>
-              {Array.from({ length: 36 }, (_, i) => 1990 + i).map((year) => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-            <select
-              name="seatCount"
-              value={vehicle.seatCount}
-              onChange={handleVehicleChange}
-              className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400"
-            >
-              <option value="">Select Seat Count</option>
-              {[1, 2, 3, 4].map((count) => (
-                <option key={count} value={count}>{count}</option>
-              ))}
-            </select>
-            <select
-              name="color"
-              value={vehicle.color}
-              onChange={handleVehicleChange}
-              className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400"
-            >
-              <option value="">Select Color</option>
-              {["White","Black","Silver","Blue","Red","Green","Yellow","Gray","Brown","Orange","Purple"].map((color) => (
-                <option key={color} value={color}>{color}</option>
-              ))}
-            </select>
-            <input name="registrationNo" value={vehicle.registrationNo} onChange={handleVehicleChange} placeholder="Registration No" className="px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400" />
-          </div>
-
           {/* Continue Button */}
           <div className="flex justify-center mt-6">
-            <button
-              type="submit"
-              className="px-10 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-bold shadow-lg transition-all"
-            >
+            <button type="submit" className="px-10 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-bold shadow-lg transition-all">
               Continue →
             </button>
           </div>

@@ -1,6 +1,8 @@
 "use client"; // Client component for hooks
 
 import "./globals.css";
+import 'leaflet/dist/leaflet.css';
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { usePathname } from "next/navigation";

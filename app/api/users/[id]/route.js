@@ -1,49 +1,33 @@
-import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import Employee from "@/models/Employee";
+import Role from "@/models/Role";
+import Vehicle from "@/models/Vehicle";
 
-export async function GET(req, { params }) {
-  try {
-    await dbConnect();
-    const user = await authMiddleware(req);
-      if (!user) {
-        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-      }
-    const item = await User.findById(params.id).populate("EmployeeId RoleId");
-    if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(item);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
+export async function GET(req, context) {
+  const { params } = context; // ✅ await params
+  await dbConnect();
 
-export async function PUT(req, { params }) {
   try {
-    await dbConnect();
-    const user = await authMiddleware(req);
-      if (!user) {
-        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-      }
-    const body = await req.json();
-    const updated = await User.findByIdAndUpdate(params.id, body, { new: true });
-    if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(updated);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
-  }
-}
+    const user = await User.findById(params.id)
+      .populate({ path: "employeeId", model: "Employee" })
+      .populate({ path: "roleId", model: "Role" })
+      .populate({ path: "vehicleId", model: "Vehicle" });
 
-export async function DELETE(req, { params }) {
-  try {
-    await dbConnect();
-    const user = await authMiddleware(req);
-      if (!user) {
-        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-      }
-    const deleted = await User.findByIdAndDelete(params.id);
-    if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ message: "Deleted" });
+    if (!user)
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+
+    return new Response(JSON.stringify(user), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

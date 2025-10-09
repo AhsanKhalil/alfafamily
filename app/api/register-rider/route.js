@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import Vehicle from "@/models/Vehicle";
+import bcrypt from "bcryptjs";
 
 export async function POST(req) {
   await dbConnect();
@@ -8,41 +8,29 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-      // Default role for Driver
-    body.roleId = "68e79c68e60358a66e60d165";
-    
-    // Validate required fields
     if (!body.roleId) throw new Error("roleId is required");
     if (!body.userId) throw new Error("userId is required");
 
-    // Save Vehicle first
-    let vehicle = await Vehicle.create({ ...body.vehicle });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(body.password, 10);
 
     // Save User
     const user = await User.create({
       employeeId: body.employeeId,
       roleId: body.roleId,
       userId: body.userId,
+      userName: body.userName,
       password: body.password,
-      cnic: body.employeeData.cnic,
-      vehicleId: vehicle._id,
-      companyId: "68cb208a1ee72d77ccdc23cc" // companyId
+      cnic: body.employeeData?.cnic || "",
+      createdOn: new Date(),
     });
 
-    // Update vehicle with owner and company
-    vehicle.owner = user._id;
-    vehicle.companyid = "68cb208a1ee72d77ccdc23cc";
-    vehicle.modifiedOn = new Date();
-    vehicle.modifiedBy = user._id;
-
-    await vehicle.save();
-
     return new Response(
-      JSON.stringify({ message: "Driver registered successfully!", user, vehicle }),
+      JSON.stringify({ message: "Rider registered successfully!", user }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("Register Driver Error:", err);
+    console.error("Register Rider Error:", err);
     return new Response(
       JSON.stringify({ error: err.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }

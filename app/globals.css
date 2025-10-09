@@ -1,4 +1,7 @@
+
+@import "react-datetime/css/react-datetime.css";
 @import "tailwindcss";
+
 
 @layer base {
   body {
