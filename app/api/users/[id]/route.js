@@ -10,6 +10,7 @@ export async function GET(req, context) {
 
   try {
     const user = await User.findById(params.id)
+    
       .populate({ path: "employeeId", model: "Employee" })
       .populate({ path: "roleId", model: "Role" })
       .populate({ path: "vehicleId", model: "Vehicle" });

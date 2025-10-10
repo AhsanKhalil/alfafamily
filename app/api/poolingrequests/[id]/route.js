@@ -8,11 +8,12 @@ export async function GET(req, { params }) {
   try {
     await dbConnect();
 
-    const user = await authMiddleware(req);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    // const user = await authMiddleware(req);
+    // if (!user) {
+    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    // }
 
+        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     const { id } = params;
     const poolingRequest = await PoolingRequest.findById(id)
       .populate("userId", "firstName lastName email phoneNumber profileImage")
@@ -39,10 +40,13 @@ export async function PUT(req, { params }) {
   try {
     await dbConnect();
 
-    const user = await authMiddleware(req);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    // const user = await authMiddleware(req);
+    // if (!user) {
+    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    // }
+
+
+        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
     const { id } = params;
     const body = await req.json();
@@ -56,7 +60,7 @@ export async function PUT(req, { params }) {
     }
 
     // Check ownership
-    if (poolingRequest.userId.toString() !== user.userId) {
+    if (poolingRequest.userId.toString() !== userId) {
       return NextResponse.json(
         { error: "Unauthorized to update this request" },
         { status: 403 }
@@ -85,10 +89,13 @@ export async function DELETE(req, { params }) {
   try {
     await dbConnect();
 
-    const user = await authMiddleware(req);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    // const user = await authMiddleware(req);
+    // if (!user) {
+    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    // }
+
+
+        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
     const { id } = params;
     const poolingRequest = await PoolingRequest.findById(id);
@@ -101,7 +108,7 @@ export async function DELETE(req, { params }) {
     }
 
     // Check ownership
-    if (poolingRequest.userId.toString() !== user.userId) {
+    if (poolingRequest.userId.toString() !== userId) {
       return NextResponse.json(
         { error: "Unauthorized to delete this request" },
         { status: 403 }

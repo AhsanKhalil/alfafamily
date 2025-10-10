@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Custom marker icon fix
+// ✅ Custom marker icon fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/leaflet/marker-icon-2x.png",
@@ -28,7 +28,7 @@ export default function PoolingMap({ onSelectLocation }) {
   const [marker, setMarker] = useState(null);
 
   useEffect(() => {
-    // Ensure cleanup on unmount to prevent "already initialized" error
+    // ✅ Cleanup to prevent "already initialized" error
     return () => {
       const container = L.DomUtil.get("map");
       if (container) container._leaflet_id = null;
@@ -37,8 +37,30 @@ export default function PoolingMap({ onSelectLocation }) {
 
   const handleSelect = async ({ lat, lng }) => {
     setMarker([lat, lng]);
-    const address = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-    onSelectLocation(address);
+
+    try {
+      // ✅ Reverse geocoding using OpenStreetMap
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+      );
+      const data = await res.json();
+
+      // ✅ Extract meaningful area name
+      const address =
+        data.address?.suburb ||
+        data.address?.neighbourhood ||
+        data.address?.town ||
+        data.address?.city ||
+        data.address?.county ||
+        data.display_name ||
+        `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+
+      // ✅ Return only area name to parent
+      onSelectLocation(address);
+    } catch (err) {
+      console.error("Error fetching address:", err);
+      onSelectLocation(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+    }
   };
 
   return (
