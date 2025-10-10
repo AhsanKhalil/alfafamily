@@ -30,6 +30,7 @@ export default function NewPoolingRequestForm({ onSubmit }) {
         poolTime,
         totalSeats,
         availableSeats: totalSeats,
+        userId:localStorage.getItem("userId")
       };
 
       const res = await axios.post("/api/poolingrequests", body);

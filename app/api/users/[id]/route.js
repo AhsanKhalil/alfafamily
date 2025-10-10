@@ -5,27 +5,30 @@ import Role from "@/models/Role";
 import Vehicle from "@/models/Vehicle";
 
 export async function GET(req, context) {
-  const { params } = context; // ✅ await params
+  const params = await context.params; // ✅ Await only params
   await dbConnect();
 
   try {
-    const user = await User.findById(params.id)
-    
-      .populate({ path: "employeeId", model: "Employee" })
-      .populate({ path: "roleId", model: "Role" })
-      .populate({ path: "vehicleId", model: "Vehicle" });
+    console.log("Fetching user with ID:", params.id);
 
-    if (!user)
+    const user = await User.findById(params.id)
+      .populate({ path: "employeeId", model: Employee })
+      .populate({ path: "roleId", model: Role })
+      .populate({ path: "vehicleId", model: Vehicle });
+
+    if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
+    }
 
     return new Response(JSON.stringify(user), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
+    console.error("Error fetching user:", err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

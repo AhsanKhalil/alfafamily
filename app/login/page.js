@@ -72,8 +72,13 @@ export default function LoginPage() {
         try {
           localStorage.setItem("token", token);
           localStorage.setItem("userId", userId);
+
+          
+
+
         } catch (err) {
-          // ignore storage errors
+          
+console.log(err);
         }
 
         await Swal.fire({
@@ -87,6 +92,11 @@ export default function LoginPage() {
 
 
         localStorage.setItem("userId", data.user._id);
+
+
+console.log(data.user._id);
+console.log(userId);
+
         
         router.push("/dashboard");
       } else {

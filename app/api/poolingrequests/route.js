@@ -76,8 +76,9 @@ export async function POST(req) {
       body.availableSeats = body.totalSeats;
     }
 
+    
 
-        const userId = "68e8054a1dada86a5dbb1226";//typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+        const userId =  body.userId; //"68e8054a1dada86a5dbb1226";//typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
 
 console.log("userId from localStorage:", userId);
@@ -113,78 +114,3 @@ console.log("userId from localStorage:", userId);
 }
 
 
-
-
-
-// export async function GET(req) {
-//   try {
-//     await dbConnect();
-
-//     console.log("Fetching pooling requests...");
-
-//     const user = await authMiddleware(req);
-//     if (!user) {
-//       return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-//     }
-
-//     // ✅ Parse query parameters
-//     const { searchParams } = new URL(req.url);
-//     const status = searchParams.get("status");
-//     const userId = searchParams.get("userId");
-//     const vehicleId = searchParams.get("vehicleId");
-
-//     // ✅ Build filter dynamically
-//     const filter = {};
-//     if (status) filter.status = status;
-//     if (userId) filter.userId = userId;
-//     if (vehicleId) filter.vehicleId = vehicleId;
-
-//     const startOfToday = new Date();
-//     startOfToday.setHours(0, 0, 0, 0);
-
-// const endOfToday = new Date();
-// endOfToday.setHours(23, 59, 59, 999);
-
-// // Query today's requests
-// const items_ = await PoolingRequests.find({
-//   requestTime: { $gte: startOfToday, $lte: endOfToday }
-// })
-//   .populate("userId", "firstName lastName email");
-//   //.populate("vehicleId", "plateNumber model");
-
-//     //const items = await PoolingRequests.find(filter)
-//       //.populate("userId", "firstName lastName email")
-//       //.populate("vehicleId", "plateNumber model");
-
-//     console.log("Fetched pooling requests:", items_.length);
-
-//     return NextResponse.json(items_, { status: 200 });
-//   } catch (err) {
-//     console.error("GET error:", err);
-//     return NextResponse.json({ error: err.message }, { status: 500 });
-//   }
-// }
-
-// export async function POST(req) {
-//   try {
-//     await dbConnect();
-
-//     const user = await authMiddleware(req);
-//     if (!user) {
-//       return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-//     }
-
-//     const body = await req.json();
-
-//     // ✅ Ensure availableSeats defaults to totalSeats if not provided
-//     if (!body.availableSeats && body.totalSeats) {
-//       body.availableSeats = body.totalSeats;
-//     }
-
-//     const created = await PoolingRequests.create(body);
-//     return NextResponse.json(created, { status: 201 });
-//   } catch (err) {
-//     console.error("POST error:", err);
-//     return NextResponse.json({ error: err.message }, { status: 400 });
-//   }
-// }
