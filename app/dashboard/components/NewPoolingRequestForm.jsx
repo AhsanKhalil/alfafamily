@@ -48,74 +48,111 @@ export default function NewPoolingRequestForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-xl shadow-lg text-white">
-      <h3 className="text-lg font-semibold text-green-400 mb-4">Create New Request</h3>
+    <>
+      {/* ✅ Inline dark theme override for react-datetime */}
+      <style jsx global>{`
+        .rdtPicker {
+          background-color: #1f2937 !important; /* bg-gray-800 */
+          color: #e5e7eb !important; /* text-gray-200 */
+          border: 1px solid #374151 !important; /* border-gray-700 */
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .rdtPicker table td,
+        .rdtPicker table th {
+          color: #e5e7eb !important;
+        }
+        .rdtPicker .rdtActive,
+        .rdtPicker .rdtActive:hover {
+          background-color: #10b981 !important; /* green-500 */
+          color: #000 !important;
+          border-radius: 0.25rem;
+        }
+        .rdtPicker td:hover,
+        .rdtPicker .rdtTimeToggle:hover {
+          background-color: #374151 !important; /* hover:bg-gray-700 */
+        }
+        .rdtTime,
+        .rdtCounter {
+          background-color: #1f2937 !important;
+          color: #e5e7eb !important;
+        }
+        .rdtBtn {
+          color: #10b981 !important;
+        }
+        .rdtBtn:hover {
+          color: #34d399 !important;
+        }
+      `}</style>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          value={pickup}
-          readOnly
-          onClick={() => setShowMapFor("pickup")}
-          placeholder="Click to select pickup location"
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500"
-        />
-      </div>
+      <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-xl shadow-lg text-white">
+        <h3 className="text-lg font-semibold text-green-400 mb-4">Create New Request</h3>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          value={dropoff}
-          readOnly
-          onClick={() => setShowMapFor("dropoff")}
-          placeholder="Click to select dropoff location"
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500"
-        />
-      </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            value={pickup}
+            readOnly
+            onClick={() => setShowMapFor("pickup")}
+            placeholder="Click to select pickup location"
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500"
+          />
+        </div>
 
-      {showMapFor && (
-        <PoolingMap
-          key={showMapFor}
-          onSelectLocation={(address) => {
-            if (showMapFor === "pickup") setPickup(address);
-            else setDropoff(address);
-            setShowMapFor(null);
-          }}
-        />
-      )}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={dropoff}
+            readOnly
+            onClick={() => setShowMapFor("dropoff")}
+            placeholder="Click to select dropoff location"
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500"
+          />
+        </div>
 
-      <div className="mb-4">
-        <Datetime
-          value={poolTime}
-          onChange={(date) => setPoolTime(date)}
-          inputProps={{
-            placeholder: "Select pool time",
-            className:
-              "w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 text-white",
-          }}
-        />
-      </div>
+        {showMapFor && (
+          <PoolingMap
+            key={showMapFor}
+            onSelectLocation={(address) => {
+              if (showMapFor === "pickup") setPickup(address);
+              else setDropoff(address);
+              setShowMapFor(null);
+            }}
+          />
+        )}
 
-      <div className="mb-4">
-        <select
-          value={totalSeats}
-          onChange={(e) => setTotalSeats(parseInt(e.target.value))}
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 text-white"
+        <div className="mb-4">
+          <Datetime
+            value={poolTime}
+            onChange={(date) => setPoolTime(date)}
+            inputProps={{
+              placeholder: "Select pool time",
+              className:
+                "w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 text-white",
+            }}
+          />
+        </div>
+
+        <div className="mb-4">
+          <select
+            value={totalSeats}
+            onChange={(e) => setTotalSeats(parseInt(e.target.value))}
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 text-white"
+          >
+            {[1, 2, 3, 4].map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-2 bg-green-500 hover:bg-green-600 text-black rounded-lg font-semibold transition"
         >
-          {[1, 2, 3, 4].map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        className="w-full py-2 bg-green-500 hover:bg-green-600 text-black rounded-lg font-semibold transition"
-      >
-        Create Request
-      </button>
-    </form>
+          Create Request
+        </button>
+      </form>
+    </>
   );
 }
