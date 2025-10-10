@@ -3,6 +3,7 @@ import User from "@/models/User";
 import Employee from "@/models/Employee";
 import Role from "@/models/Role";
 import Vehicle from "@/models/Vehicle";
+import Company from "@/models/Company";
 
 export async function GET(req, context) {
   const params = await context.params; // ✅ Await only params
@@ -14,7 +15,9 @@ export async function GET(req, context) {
     const user = await User.findById(params.id)
       .populate({ path: "employeeId", model: Employee })
       .populate({ path: "roleId", model: Role })
-      .populate({ path: "vehicleId", model: Vehicle });
+      .populate({ path: "vehicleId", model: Vehicle })
+      .populate({ path: "companyId", model: Company });
+
 
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
