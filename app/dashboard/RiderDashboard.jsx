@@ -85,7 +85,7 @@ export default function RiderDashboard() {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-6">Rider Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Passenger Dashboard</h1>
 
       {/* Top Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

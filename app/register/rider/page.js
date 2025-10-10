@@ -163,7 +163,7 @@ export default function RegisterRider() {
     <main className="bg-black text-white min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-3xl bg-gray-900 rounded-2xl shadow-2xl p-10 space-y-6">
         <h1 className="text-3xl font-bold text-green-400 mb-4 text-center">
-          🏍 Register as Rider
+          🏍 Register as Passenger
         </h1>
 
         <form onSubmit={handleContinue} className="space-y-6">

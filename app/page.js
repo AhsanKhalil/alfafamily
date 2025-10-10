@@ -43,7 +43,7 @@ export default function HomePage() {
               href="/register/rider"
               className="inline-block px-6 py-3 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-semibold shadow-lg transition-all text-center"
             >
-              Register as Rider
+              Register as Passenger
             </Link>
           </div>
         </div>
