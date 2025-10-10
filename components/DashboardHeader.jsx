@@ -37,7 +37,7 @@ export default function DashboardHeader({ username = "Ahsan" }) {
           <ul className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
             {/* <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Profile</li> */}
             <Link href="/profile" className="block px-4 py-2 hover:bg-gray-700 cursor-pointer"> Profile</Link>
-            <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Change Password</li>
+             <Link href="/changepassword" className="block px-4 py-2 hover:bg-gray-700 cursor-pointer"> Change Password</Link>
             <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Activity</li>
             <Link href="/login" className="block px-4 py-2 hover:bg-gray-700 cursor-pointer"> Logout</Link>
           </ul>
