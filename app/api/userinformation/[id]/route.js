@@ -3,14 +3,11 @@ import dbConnect from "@/lib/mongodb";
 import UserInformation from "@/models/UserInformation";
 
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   try {
     await dbConnect();
-    /* const user = await authMiddleware(req);
-      if (!user) {
-        return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-      }
- */    const { id } = params;
+
+    const { id } = await context.params; // ✅ await is required here
 
     const userInfo = await UserInformation.findOne({ userId: id });
 
@@ -20,10 +17,11 @@ export async function GET(req, { params }) {
 
     return NextResponse.json(userInfo, { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching user info:", err);
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
 
 
 export async function PUT(req, { params }) {

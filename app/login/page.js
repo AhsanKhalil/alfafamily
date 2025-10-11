@@ -73,6 +73,7 @@ export default function LoginPage() {
           localStorage.setItem("token", token);
           localStorage.setItem("userId", userId);
 
+
           
 
 
@@ -92,11 +93,11 @@ console.log(err);
 
 
         localStorage.setItem("userId", data.user._id);
+        localStorage.setItem("username", userId);
 
 
 console.log(data.user._id);
 console.log(userId);
-
         
         router.push("/dashboard");
       } else {
