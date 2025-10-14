@@ -66,10 +66,12 @@ export default function DashboardHeader() {
             >
               Change Password
             </Link>
-            <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Activity</li>
+             <Link href="/useractivity" className="block px-4 py-2 hover:text-green-400">
+              User Activity
+             </Link>
             <li
               onClick={handleLogout}
-              className="block px-4 py-2 hover:bg-gray-700 cursor-pointer text-red-400"
+              className="block px-4 py-2 hover:bg-gray-700 cursor-pointer text-green-400"
             >
               Logout
             </li>

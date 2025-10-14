@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import { logUserActivity } from "@/lib/logActivity";
+
 
 export async function POST(req) {
   try {
@@ -22,6 +24,16 @@ export async function POST(req) {
     // ✅ Let model hash automatically (avoid double hashing)
     user.password = newPassword;
     await user.save();
+
+        await logUserActivity({
+      userId,
+      eventPerformed: "Change Password",
+      activityDetail: "User successfully changed password",
+      ipAddress: req.headers.get("x-forwarded-for") || req.headers.get("remote-addr"),
+      deviceInfo: req.headers.get("user-agent"),
+    });
+
+
 
     return NextResponse.json({ message: "Password updated successfully" }, { status: 200 });
   } catch (err) {

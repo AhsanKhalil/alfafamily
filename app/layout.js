@@ -13,10 +13,11 @@ export default function RootLayout({ children }) {
   const isDashboardPage = pathname.startsWith("/dashboard");
   const isProfilePage = pathname.startsWith("/profile");
     const isChangepassword = pathname.startsWith("/changepassword");
+    const isActivitylog = pathname.startsWith("/useractivity");
 
 
   // show main header only if not dashboard or profile
-  const showMainHeader = !isDashboardPage && !isProfilePage && !isChangepassword;
+  const showMainHeader = !isDashboardPage && !isProfilePage && !isChangepassword && !isActivitylog;
 
   return (
     <html lang="en">
