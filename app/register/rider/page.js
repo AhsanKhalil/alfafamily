@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Import eye icons
 
 export default function RegisterRider() {
   const [employees, setEmployees] = useState([]);
@@ -216,7 +217,7 @@ export default function RegisterRider() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 cursor-pointer text-green-400"
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </span>
             </div>
             <div className="relative">
@@ -232,7 +233,7 @@ export default function RegisterRider() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-3 cursor-pointer text-green-400"
               >
-                {showConfirmPassword ? "👁️" : "🙈"}
+                {showConfirmPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </span>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Import eye icons
 
 export default function RegisterDriver() {
   const [employees, setEmployees] = useState([]);
@@ -242,7 +243,7 @@ export default function RegisterDriver() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 cursor-pointer text-green-400"
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </span>
             </div>
 
@@ -260,7 +261,7 @@ export default function RegisterDriver() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-3 cursor-pointer text-green-400"
               >
-                {showConfirmPassword ? "👁️" : "🙈"}
+                {showConfirmPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </span>
             </div>
           </div>
@@ -322,7 +323,7 @@ export default function RegisterDriver() {
           <div className="flex justify-center mt-6">
             <button
               type="submit"
-              className="px-10 py-3 rounded-xl bg-yellow-500 hover:bg-green-600 text-black font-bold shadow-lg transition-all"
+              className="px-10 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-bold shadow-lg transition-all"
             >
               Continue →
             </button>
