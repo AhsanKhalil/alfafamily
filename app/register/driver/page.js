@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
@@ -8,6 +9,8 @@ import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Import eye icons
 export default function RegisterDriver() {
   const [employees, setEmployees] = useState([]);
   const [employeeId, setEmployeeId] = useState("");
+  
+const [searchTerm, setSearchTerm] = useState("");
   const [employeeData, setEmployeeData] = useState({
     firstName: "",
     lastName: "",
@@ -191,23 +194,40 @@ export default function RegisterDriver() {
 
         <form onSubmit={handleContinue} className="space-y-6">
           {/* Employee Dropdown */}
-          <div>
-            <label className="block text-yellow-400 mb-2 font-semibold">
-              Select Employee
-            </label>
-            <select
-              value={employeeId}
-              onChange={(e) => handleEmployeeSelect(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400 focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">-- Select Employee --</option>
-              {employees.map((emp) => (
-                <option key={emp._id} value={emp._id}>
-                  {emp.firstName} {emp.lastName} ({emp.empid})
-                </option>
-              ))}
-            </select>
-          </div>
+         {/* Searchable Employee Dropdown */}
+<div>
+  <label className="block text-yellow-400 mb-2 font-semibold">
+    Select Employee
+  </label>
+
+  {/* Search Field */}
+  <input
+    type="text"
+    placeholder="Search by name or empid..."
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full mb-2 px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400 focus:ring-2 focus:ring-green-500"
+  />
+
+  <select
+    value={employeeId}
+    onChange={(e) => handleEmployeeSelect(e.target.value)}
+    className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400 focus:ring-2 focus:ring-green-500"
+  >
+    <option value="">-- Select Employee --</option>
+    {employees
+      .filter((emp) =>
+        `${emp.firstName} ${emp.lastName} ${emp.empid}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+      .map((emp) => (
+        <option key={emp._id} value={emp._id}>
+          {emp.firstName} {emp.lastName} ({emp.empid})
+        </option>
+      ))}
+  </select>
+</div>
+
 
           {/* Employee Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
