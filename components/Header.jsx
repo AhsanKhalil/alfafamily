@@ -7,7 +7,12 @@ export default function Header() {
     <header className="bg-black text-white shadow-md">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         {/* Logo / App Name */}
-        <h1 className="text-2xl font-bold text-green-400">Alfamily</h1>
+        
+         <Link href="/" className="flex items-center font-bold text-4xl ml-6 cursor-pointer select-none">
+  <span className="text-white-400">Al</span>
+  <span className="text-yellow-400">family</span>
+</Link>
+
 
         {/* Navigation */}
         <nav>
