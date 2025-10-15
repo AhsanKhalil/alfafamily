@@ -184,7 +184,7 @@ export default function RegisterDriver() {
   return (
     <main className="bg-black text-white min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-5xl bg-gray-900 rounded-2xl shadow-2xl p-10 space-y-6">
-        <h1 className="text-3xl font-bold text-green-400 mb-4 text-center">
+        <h1 className="text-3xl font-bold text-yellow-400 mb-4 text-center">
           🚗 Register as Driver
         </h1>
 
@@ -322,7 +322,7 @@ export default function RegisterDriver() {
           <div className="flex justify-center mt-6">
             <button
               type="submit"
-              className="px-10 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-bold shadow-lg transition-all"
+              className="px-10 py-3 rounded-xl bg-yellow-500 hover:bg-green-600 text-black font-bold shadow-lg transition-all"
             >
               Continue →
             </button>
