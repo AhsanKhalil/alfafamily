@@ -24,9 +24,11 @@ export default function DashboardHeader() {
   return (
     <header className="bg-black text-white py-4 px-6 flex justify-between items-center shadow-md">
       {/* Logo */}
-      <div className="flex items-center space-x-2">
-        <span className="font-bold text-xl text-green-400">Alfamily</span>
-      </div>
+    <div className="flex items-center font-bold text-4xl ml-6 cursor-default select-none">
+  <span className="text-yellow-400">Al</span>
+  <span className="text-green-400">family</span>
+</div>
+
 
       {/* Search bar */}
       <div className="flex-1 mx-6">
