@@ -1,10 +1,16 @@
+// âœ… app/api/notification/route.js
+
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb"; // Make sure this connects to MongoDB
+import dbConnect from "@/lib/mongodb";
 import Notification from "@/models/Notification";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
+
+  if (!userId) {
+    return NextResponse.json({ success: false, message: "Missing userId" }, { status: 400 });
+  }
 
   await dbConnect();
 
@@ -26,6 +32,10 @@ export async function GET(request) {
 export async function PATCH(request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
+
+  if (!userId) {
+    return NextResponse.json({ success: false, message: "Missing userId" }, { status: 400 });
+  }
 
   await dbConnect();
 

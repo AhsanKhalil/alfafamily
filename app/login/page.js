@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // 👈 Loader state
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -28,7 +28,7 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true); // 👈 Start loader
+    setLoading(true);
 
     try {
       const res = await fetch("/api/users/login", {
@@ -52,6 +52,7 @@ export default function LoginPage() {
         return;
       }
 
+      // 🔐 OTP Prompt
       const { value: otp, isConfirmed } = await Swal.fire({
         title: "OTP",
         input: "text",
@@ -70,6 +71,19 @@ export default function LoginPage() {
       });
 
       if (isConfirmed) {
+        if (!otp || otp.trim() === "") {
+          await Swal.fire({
+            icon: "error",
+            title: "Missing OTP",
+            text: "Please enter your OTP to continue.",
+            background: "#111827",
+            color: "#fff",
+            confirmButtonColor: "#16a34a",
+          });
+          setLoading(false);
+          return;
+        }
+
         const token = "token-" + Date.now();
         localStorage.setItem("token", token);
         localStorage.setItem("userId", userId);
@@ -107,7 +121,7 @@ export default function LoginPage() {
         confirmButtonColor: "#16a34a",
       });
     } finally {
-      setLoading(false); // 👈 Stop loader
+      setLoading(false);
     }
   };
 
@@ -132,6 +146,7 @@ export default function LoginPage() {
           </h2>
 
           <form onSubmit={handleLogin} className="space-y-6">
+            {/* USER ID */}
             <div>
               <label className="block text-sm mb-2">User ID</label>
               <input
@@ -144,6 +159,7 @@ export default function LoginPage() {
               />
             </div>
 
+            {/* PASSWORD */}
             <div className="relative">
               <label className="block text-sm mb-2">Password</label>
               <input
@@ -164,7 +180,7 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* ✅ LOGIN BUTTON WITH LOADER */}
+            {/* LOGIN BUTTON */}
             <button
               type="submit"
               disabled={loading}
