@@ -17,6 +17,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "alfamily.vercel.app",
       },
+       {
+        protocol: "https",
+        hostname: "img.freepik.com",
+      },
     ],
     
   },
