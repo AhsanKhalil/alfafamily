@@ -114,7 +114,7 @@ export default function LoginPage() {
       {/* LEFT SIDE - IMAGE */}
       <div className="hidden md:flex justify-center">
         <Image
-          src="https://img.freepik.com/free-vector/people-holding-connected-copy-space-circle-icons_53876-66230.jpg"
+          src="https://img.freepik.com/premium-photo/3d-rendering-social-connections-within-network_232104-6.jpg"
           alt="Login visual"
           width={500}
           height={500}
