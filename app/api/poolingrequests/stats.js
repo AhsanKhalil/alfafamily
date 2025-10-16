@@ -8,7 +8,7 @@ export default async function handler(req, res) {
       
       // Count documents based on different statuses
       const total = await PoolingRequest.countDocuments(); // Total bookings
-      const completed = await PoolingRequest.countDocuments({ status: "accepted" }); // Completed rides
+      const completed = await PoolingRequest.countDocuments({ status: "active" }); // Completed rides
       const cancelled = await PoolingRequest.countDocuments({ status: "cancelled" }); // Cancelled rides
 
       // Send stats back to the client

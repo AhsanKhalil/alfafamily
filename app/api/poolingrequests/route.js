@@ -95,7 +95,7 @@ export async function GET_STATS() {
 
     const total = await PoolingRequest.countDocuments();
     const active = await PoolingRequest.countDocuments({ status: "active" });
-    const completed = await PoolingRequest.countDocuments({ status: "completed" });
+    const completed = await PoolingRequest.countDocuments({ status: "pending" });
     const cancelled = await PoolingRequest.countDocuments({ status: "cancelled" });
 
     return NextResponse.json({

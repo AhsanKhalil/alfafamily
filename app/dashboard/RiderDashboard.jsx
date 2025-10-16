@@ -57,7 +57,7 @@ export default function PassengerDashboard() {
       if (!data.success) throw new Error(data.error || "Failed to fetch");
 
       const total = data.count || 0;
-      const completed = data.data.filter((r) => r.status === "accepted").length;
+      const completed = data.data.filter((r) => r.status === "active").length;
       const cancelled = data.data.filter((r) => r.status === "cancelled").length;
 
       setRequests(data.data);
@@ -139,11 +139,11 @@ export default function PassengerDashboard() {
 
   // Dummy chart data
   const lineData = [
-    { day: "Mon", Cost: 4000 },
-    { day: "Tue", Cost: 3000 },
-    { day: "Wed", Cost: 5000 },
-    { day: "Thu", Cost: 4000 },
-    { day: "Fri", Cost: 6000 },
+    { day: "Mon", Cost: 1000 },
+    { day: "Tue", Cost: 500 },
+    { day: "Wed", Cost: 1000 },
+    { day: "Thu", Cost: 250 },
+    { day: "Fri", Cost: 1000 },
   ];
 
   const areaData = [
@@ -163,7 +163,7 @@ export default function PassengerDashboard() {
         <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
           <div>
             <h2 className="text-lg">Total Cost</h2>
-            <p className="text-2xl font-bold">Rs. 12,500</p>
+            <p className="text-2xl font-bold">Rs. 6,000</p>
           </div>
           <FaDollarSign className="text-green-400 text-4xl" />
         </div>
@@ -260,8 +260,8 @@ export default function PassengerDashboard() {
                 <Area
                   type="monotone"
                   dataKey="rides"
-                  stroke="#82ca9d"
-                  fill="#82ca9d"
+                  stroke="#f80000ff"
+                  fill="#ff3e03ff"
                 />
               </AreaChart>
             </div>
