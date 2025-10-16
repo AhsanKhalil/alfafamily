@@ -51,7 +51,7 @@ export default function HomePage() {
         {/* RIGHT SIDE - IMAGE */}
         <div className="flex justify-center md:justify-end">
           <Image
-            src="https://img.freepik.com/premium-psd/network-people-connection-front-view-isolated-transparent-background_996812-36574.jpg"
+            src="https://img.freepik.com/free-vector/illustration-business-people_53876-58975.jpg"
             alt="Connecting people carpool"
             width={500}
             height={500}
