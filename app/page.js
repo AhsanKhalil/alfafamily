@@ -51,7 +51,7 @@ export default function HomePage() {
         {/* RIGHT SIDE - IMAGE */}
         <div className="flex justify-center md:justify-end">
           <Image
-            src="https://alfamily.vercel.app/images/ride-sharing-illustration.png"
+            src="https://img.freepik.com/free-vector/people-holding-connected-copy-space-circle-icons_53876-66230.jpg"
             alt="Connecting people carpool"
             width={500}
             height={500}
