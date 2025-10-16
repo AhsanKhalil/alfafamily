@@ -2,9 +2,14 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import axios from "axios";
 import Image from "next/image";
-import { FaDollarSign, FaCar, FaCheckCircle, FaTimesCircle, FaStar } from "react-icons/fa";
+import {
+  FaDollarSign,
+  FaCar,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaStar,
+} from "react-icons/fa";
 import {
   LineChart,
   Line,
@@ -18,28 +23,45 @@ import {
 } from "recharts";
 
 // Dynamic import to avoid SSR issues
-const PassengerRequestAccept = dynamic(() => import("./components/PassengerRequestAccept"), {
-  ssr: false,
-});
+const PassengerRequestAccept = dynamic(
+  () => import("./components/PassengerRequestAccept"),
+  { ssr: false }
+);
 
 export default function PassengerDashboard() {
   const [requests, setRequests] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    cancelled: 0,
+  });
+
   const rating = 4.5;
 
   const renderStars = () =>
     [...Array(5)].map((_, i) => (
-      <FaStar key={i} className={`inline-block ${i < Math.floor(rating) ? "text-yellow-400" : "text-gray-500"}`} />
+      <FaStar
+        key={i}
+        className={`inline-block ${
+          i < Math.floor(rating) ? "text-yellow-400" : "text-gray-500"
+        }`}
+      />
     ));
 
+  // ✅ Fetch all pooling requests (no userId)
   const fetchRequests = async () => {
     try {
-      const userId = localStorage.getItem("userId");
-      const res = await axios.get(`/api/poolingrequests`);
-      const data = res.data?.data || res.data || [];
+      const response = await fetch(`/api/poolingrequests`);
+      const data = await response.json();
 
-      // Only show active requests not created by this passenger
-      const available = data.filter((r) => String(r.userId) !== String(userId));
-      setRequests(available);
+      if (!data.success) throw new Error(data.error || "Failed to fetch");
+
+      const total = data.count || 0;
+      const completed = data.data.filter((r) => r.status === "accepted").length;
+      const cancelled = data.data.filter((r) => r.status === "cancelled").length;
+
+      setRequests(data.data);
+      setStats({ total, completed, cancelled });
     } catch (err) {
       console.error("Error fetching pooling requests:", err);
     }
@@ -58,21 +80,27 @@ export default function PassengerDashboard() {
         return;
       }
 
-      const res = await axios.patch(`/api/poolingrequests/${id}`, {
-        status: "accepted",
-        riderId: userId, // ✅ correct key
+      const response = await fetch(`/api/poolingrequests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "accepted",
+          riderId: userId,
+        }),
       });
 
-      if (res.status === 200) {
+      const result = await response.json();
+      if (response.ok) {
         alert("Ride accepted successfully!");
-        // Optimistic UI update
-        setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "accepted" } : r)));
+        setRequests((prev) =>
+          prev.map((r) => (r._id === id ? { ...r, status: "accepted" } : r))
+        );
       } else {
-        alert(res.data?.message || "Could not accept ride.");
+        alert(result.message || "Could not accept ride.");
       }
     } catch (err) {
-      console.error("Accept failed:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Could not accept request. Try again.");
+      console.error("Accept failed:", err);
+      alert("Could not accept the request. Try again.");
     }
   };
 
@@ -85,25 +113,31 @@ export default function PassengerDashboard() {
         return;
       }
 
-      const res = await axios.patch(`/api/poolingrequests/${id}`, {
-        status: "cancelled",
-        riderId: userId, // ✅ use same key
+      const response = await fetch(`/api/poolingrequests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "cancelled",
+          riderId: userId,
+        }),
       });
 
-      if (res.status === 200) {
+      const result = await response.json();
+      if (response.ok) {
         alert("Ride cancelled successfully!");
-        // Optimistic update for UI
-        setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "cancelled" } : r)));
+        setRequests((prev) =>
+          prev.map((r) => (r._id === id ? { ...r, status: "cancelled" } : r))
+        );
       } else {
-        alert(res.data?.message || "Could not cancel ride.");
+        alert(result.message || "Could not cancel ride.");
       }
     } catch (err) {
-      console.error("Cancel failed:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Could not cancel the ride. Try again.");
+      console.error("Cancel failed:", err);
+      alert("Could not cancel the ride. Try again.");
     }
   };
 
-  // Dummy chart data (for visuals)
+  // Dummy chart data
   const lineData = [
     { day: "Mon", Cost: 4000 },
     { day: "Tue", Cost: 3000 },
@@ -113,18 +147,16 @@ export default function PassengerDashboard() {
   ];
 
   const areaData = [
-    { name: "Completed", rides: 120 },
-    { name: "Cancelled", rides: 30 },
-    { name: "Pending", rides: 50 },
+    { name: "Completed", rides: stats.completed },
+    { name: "Cancelled", rides: stats.cancelled },
+    { name: "Pending", rides: stats.total - stats.completed - stats.cancelled },
   ];
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
-
-       <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">
+      <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">
         Passenger Dashboard
       </h2>
-
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -135,24 +167,27 @@ export default function PassengerDashboard() {
           </div>
           <FaDollarSign className="text-green-400 text-4xl" />
         </div>
+
         <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
           <div>
             <h2 className="text-lg">Total Bookings</h2>
-            <p className="text-2xl font-bold">320</p>
+            <p className="text-2xl font-bold">{stats.total}</p>
           </div>
           <FaCar className="text-blue-400 text-4xl" />
         </div>
+
         <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
           <div>
             <h2 className="text-lg">Completed Rides</h2>
-            <p className="text-2xl font-bold">120</p>
+            <p className="text-2xl font-bold">{stats.completed}</p>
           </div>
           <FaCheckCircle className="text-green-500 text-4xl" />
         </div>
+
         <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
           <div>
             <h2 className="text-lg">Cancelled Rides</h2>
-            <p className="text-2xl font-bold">30</p>
+            <p className="text-2xl font-bold">{stats.cancelled}</p>
           </div>
           <FaTimesCircle className="text-red-500 text-4xl" />
         </div>
@@ -160,15 +195,22 @@ export default function PassengerDashboard() {
 
       {/* Car Info + Charts */}
       <div className="flex flex-col md:flex-row gap-6 mb-8">
+        {/* Car Info */}
         <div className="md:w-1/3 bg-gray-800 rounded-xl shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-center">Car & Driver Info</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center">
+            Car & Driver Info
+          </h2>
           <div className="flex flex-col items-center gap-4">
             <div className="bg-gray-700 p-4 rounded-lg w-full flex flex-col items-center">
-              <Image src="/car.png" alt="Car" width={250} height={150} className="rounded-lg mb-4" />
-              <div className="text-center mb-3">
-                <h2 className="text-2xl font-bold">{rating.toFixed(1)}</h2>
-                {renderStars()}
-              </div>
+             <FaCar className="text-blue-400 text-7xl mb-3 drop-shadow-lg" />
+
+  {/* Rating Section */}
+  <div className="text-center mb-3">
+    <h2 className="text-3xl font-extrabold text-white">{rating.toFixed(1)}</h2>
+    <div className="flex justify-center mt-2 space-x-1 text-2xl">
+      {renderStars()}
+    </div>
+  </div>
               <div className="overflow-x-auto w-full">
                 <table className="min-w-full bg-gray-700 rounded-lg text-gray-300 text-center">
                   <tbody>
@@ -191,8 +233,11 @@ export default function PassengerDashboard() {
           </div>
         </div>
 
+        {/* Charts */}
         <div className="md:w-2/3 bg-gray-800 rounded-xl shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-center">Performance Charts</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center">
+            Performance Charts
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-700 p-4 rounded-lg text-center">
               <h3 className="mb-2">Cost Trend</h3>
@@ -212,7 +257,12 @@ export default function PassengerDashboard() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <ReTooltip />
-                <Area type="monotone" dataKey="rides" stroke="#82ca9d" fill="#82ca9d" />
+                <Area
+                  type="monotone"
+                  dataKey="rides"
+                  stroke="#82ca9d"
+                  fill="#82ca9d"
+                />
               </AreaChart>
             </div>
           </div>
@@ -221,7 +271,9 @@ export default function PassengerDashboard() {
 
       {/* Pooling Requests */}
       <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-4 text-green-400">Available Pooling Requests</h2>
+        <h2 className="text-xl font-semibold mb-4 text-green-400">
+          Available Pooling Requests
+        </h2>
 
         {requests.length === 0 ? (
           <p className="text-gray-400">No available pooling requests found.</p>

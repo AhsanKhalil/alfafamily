@@ -19,8 +19,7 @@ export default function DriverDashboard() {
 
   const fetchRequests = async () => {
     try {
-      const userId = localStorage.getItem("userId");
-      const res = await axios.get(`/api/poolingrequests?userId=${userId}`);
+      const res = await axios.get(`/api/poolingrequests`);
       setRequests(res.data.data || []);
     } catch (err) {
       console.error("Error fetching requests:", err);
@@ -33,29 +32,26 @@ export default function DriverDashboard() {
 
   return (
     <div className="p-6">
-      {/* Centered Page Title */}
-      <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">
+      {/* Page Title */}
+      <h2 className="text-3xl font-bold text-yellow-400 text-center mb-6 tracking-wide">
         Driver Dashboard
       </h2>
 
-      {/* New Pooling Request Button - Left-aligned, visible text, with icon */}
+      {/* Toggle Button */}
       <div className="mb-6">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-green-600 text-white rounded-lg transition duration-300"
+          className="flex items-center gap-2 px-5 py-3 bg-yellow-500 hover:bg-green-600 text-black font-semibold rounded-lg shadow-lg transition duration-300"
         >
-          {/* Plus Icon */}
           <svg
-            className="w-5 h-5"
+            className="w-6 h-6"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.5"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-
-          {/* Always visible text */}
           {showForm ? "Close Form" : "New Pooling Request"}
         </button>
       </div>
@@ -64,9 +60,11 @@ export default function DriverDashboard() {
       {showForm && <NewPoolingRequestForm onSubmit={fetchRequests} />}
 
       {/* Pooling Requests Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {requests.length === 0 ? (
-          <p className="text-gray-400">No pooling requests found.</p>
+          <p className="text-gray-400 text-center col-span-full">
+            No pooling requests found.
+          </p>
         ) : (
           requests.map((req) => <PoolingRequestCard key={req._id} request={req} />)
         )}

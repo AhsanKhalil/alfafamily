@@ -4,12 +4,13 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Import eye icons
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👈 Toggle state
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // 👈 Loader state
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -26,6 +27,8 @@ export default function LoginPage() {
       });
       return;
     }
+
+    setLoading(true); // 👈 Start loader
 
     try {
       const res = await fetch("/api/users/login", {
@@ -45,6 +48,7 @@ export default function LoginPage() {
           color: "#fff",
           confirmButtonColor: "#16a34a",
         });
+        setLoading(false);
         return;
       }
 
@@ -67,12 +71,8 @@ export default function LoginPage() {
 
       if (isConfirmed) {
         const token = "token-" + Date.now();
-        try {
-          localStorage.setItem("token", token);
-          localStorage.setItem("userId", userId);
-        } catch (err) {
-          console.log(err);
-        }
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", userId);
 
         await Swal.fire({
           icon: "success",
@@ -88,7 +88,7 @@ export default function LoginPage() {
 
         router.push("/dashboard");
       } else {
-        await Swal.fire({
+        Swal.fire({
           icon: "info",
           title: "Cancelled",
           text: "Login cancelled",
@@ -106,6 +106,8 @@ export default function LoginPage() {
         color: "#fff",
         confirmButtonColor: "#16a34a",
       });
+    } finally {
+      setLoading(false); // 👈 Stop loader
     }
   };
 
@@ -162,11 +164,24 @@ export default function LoginPage() {
               </button>
             </div>
 
+            {/* ✅ LOGIN BUTTON WITH LOADER */}
             <button
               type="submit"
-              className="w-full py-3 rounded-lg bg-yellow-500 hover:bg-green-600 text-black font-semibold transition"
+              disabled={loading}
+              className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 ${
+                loading
+                  ? "bg-gray-700 cursor-not-allowed"
+                  : "bg-yellow-500 hover:bg-green-600 text-black"
+              }`}
             >
-              Login
+              {loading ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
         </div>

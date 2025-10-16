@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 
-// ✅ Lazy-load map component (no SSR)
 const PoolingMap = dynamic(() => import("./PoolingMap"), { ssr: false });
 
 export default function NewPoolingRequestForm({ onSubmit }) {
@@ -14,6 +13,7 @@ export default function NewPoolingRequestForm({ onSubmit }) {
   const [dropoff, setDropoff] = useState("");
   const [poolTime, setPoolTime] = useState(null);
   const [totalSeats, setTotalSeats] = useState(1);
+  const [cost] = useState(1000); // ✅ Fixed cost
   const [showMapFor, setShowMapFor] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -30,7 +30,8 @@ export default function NewPoolingRequestForm({ onSubmit }) {
         poolTime,
         totalSeats,
         availableSeats: totalSeats,
-        userId:localStorage.getItem("userId")
+        userId: localStorage.getItem("userId"),
+        Cost: cost, // ✅ Added cost field
       };
 
       const res = await axios.post("/api/poolingrequests", body);
@@ -49,45 +50,16 @@ export default function NewPoolingRequestForm({ onSubmit }) {
   };
 
   return (
-    <>
-      {/* ✅ Inline dark theme override for react-datetime */}
-      <style jsx global>{`
-        .rdtPicker {
-          background-color: #1f2937 !important; /* bg-gray-800 */
-          color: #e5e7eb !important; /* text-gray-200 */
-          border: 1px solid #374151 !important; /* border-gray-700 */
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
-        .rdtPicker table td,
-        .rdtPicker table th {
-          color: #e5e7eb !important;
-        }
-        .rdtPicker .rdtActive,
-        .rdtPicker .rdtActive:hover {
-          background-color: #10b981 !important; /* green-500 */
-          color: #000 !important;
-          border-radius: 0.25rem;
-        }
-        .rdtPicker td:hover,
-        .rdtPicker .rdtTimeToggle:hover {
-          background-color: #374151 !important; /* hover:bg-gray-700 */
-        }
-        .rdtTime,
-        .rdtCounter {
-          background-color: #1f2937 !important;
-          color: #e5e7eb !important;
-        }
-        .rdtBtn {
-          color: #10b981 !important;
-        }
-        .rdtBtn:hover {
-          color: #34d399 !important;
-        }
-      `}</style>
+    <div className="flex justify-center mt-10 mb-10">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-900 w-full max-w-md p-6 rounded-2xl shadow-2xl text-white border border-gray-800"
+      >
+        <h3 className="text-2xl font-semibold text-green-400 mb-6 text-center">
+          Create New Request
+        </h3>
 
-      <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-xl shadow-lg text-white">
-        <h3 className="text-lg font-semibold text-green-400 mb-4">Create New Request</h3>
-
+        {/* Pickup */}
         <div className="mb-4">
           <input
             type="text"
@@ -99,6 +71,7 @@ export default function NewPoolingRequestForm({ onSubmit }) {
           />
         </div>
 
+        {/* Dropoff */}
         <div className="mb-4">
           <input
             type="text"
@@ -121,6 +94,7 @@ export default function NewPoolingRequestForm({ onSubmit }) {
           />
         )}
 
+        {/* Date & Time */}
         <div className="mb-4">
           <Datetime
             value={poolTime}
@@ -133,6 +107,7 @@ export default function NewPoolingRequestForm({ onSubmit }) {
           />
         </div>
 
+        {/* Total Seats */}
         <div className="mb-4">
           <select
             value={totalSeats}
@@ -147,6 +122,20 @@ export default function NewPoolingRequestForm({ onSubmit }) {
           </select>
         </div>
 
+        {/* Cost (Disabled) */}
+        <div className="mb-6">
+          <input
+            type="number"
+            value={cost}
+            disabled
+            className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-gray-300 cursor-not-allowed"
+          />
+          <p className="text-sm text-gray-400 mt-1 text-center">
+            Fixed cost (Rs. 1000)
+          </p>
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full py-2 bg-green-500 hover:bg-green-600 text-black rounded-lg font-semibold transition"
@@ -154,6 +143,6 @@ export default function NewPoolingRequestForm({ onSubmit }) {
           Create Request
         </button>
       </form>
-    </>
+    </div>
   );
 }

@@ -66,6 +66,15 @@ export default function PoolingRequestCard({ request, onCancel }) {
             {request.availableSeats}
           </span>
         </div>
+
+        {/* 🆕 Static Avg Cost */}
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-green-400 opacity-70" />
+          <span className="text-sm">
+            <strong className="text-gray-200">Avg Per Person Cost:</strong>{" "}
+            Rs. 250
+          </span>
+        </div>
       </div>
 
       {/* Footer */}
