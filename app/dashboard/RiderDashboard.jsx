@@ -160,21 +160,23 @@ export default function PassengerDashboard() {
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg">Total Cost</h2>
-            <p className="text-2xl font-bold">Rs. 6,000</p>
-          </div>
-          <FaDollarSign className="text-green-400 text-4xl" />
-        </div>
+     <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
+  <div>
+    <h2 className="text-lg">Total Cost</h2>
+    <p className="text-2xl font-bold">
+      Rs. {stats.total ? stats.total * 1000 : 0}
+    </p>
+  </div>
+  <FaDollarSign className="text-green-400 text-4xl" />
+</div>
 
-        <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg">Total Bookings</h2>
-            <p className="text-2xl font-bold">{stats.total}</p>
-          </div>
-          <FaCar className="text-blue-400 text-4xl" />
-        </div>
+<div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
+  <div>
+    <h2 className="text-lg">Total Bookings</h2>
+    <p className="text-2xl font-bold">{stats.total}</p>
+  </div>
+  <FaCar className="text-blue-400 text-4xl" />
+</div>
 
         <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
           <div>
