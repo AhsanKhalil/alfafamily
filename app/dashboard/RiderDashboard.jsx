@@ -5,13 +5,22 @@ import dynamic from "next/dynamic";
 import axios from "axios";
 import Image from "next/image";
 import { FaDollarSign, FaCar, FaCheckCircle, FaTimesCircle, FaStar } from "react-icons/fa";
-import { LineChart, Line, AreaChart, Area, CartesianGrid, XAxis, YAxis, Legend, Tooltip as ReTooltip } from "recharts";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Legend,
+  Tooltip as ReTooltip,
+} from "recharts";
 
-// dynamic import to avoid SSR issues
-const PassengerRequestAccept = dynamic(
-  () => import("./components/PassengerRequestAccept"),
-  { ssr: false }
-);
+// Dynamic import to avoid SSR issues
+const PassengerRequestAccept = dynamic(() => import("./components/PassengerRequestAccept"), {
+  ssr: false,
+});
 
 export default function PassengerDashboard() {
   const [requests, setRequests] = useState([]);
@@ -25,12 +34,11 @@ export default function PassengerDashboard() {
   const fetchRequests = async () => {
     try {
       const userId = localStorage.getItem("userId");
-      // Fetch all active pooling requests (adjust query as needed)
       const res = await axios.get(`/api/poolingrequests`);
       const data = res.data?.data || res.data || [];
 
-      // Show only active requests that are not created by current user (passenger)
-      const available = data.filter((r) => r.status === "active" && String(r.userId) !== String(userId));
+      // Only show active requests not created by this passenger
+      const available = data.filter((r) => String(r.userId) !== String(userId));
       setRequests(available);
     } catch (err) {
       console.error("Error fetching pooling requests:", err);
@@ -41,24 +49,61 @@ export default function PassengerDashboard() {
     fetchRequests();
   }, []);
 
+  // ✅ Accept pooling request
   const handleAccept = async (id) => {
     try {
       const userId = localStorage.getItem("userId");
-      // PATCH — update status to accepted; include acceptedBy if your backend expects it
-      await axios.patch(`/api/poolingrequests/${id}`, {
+      if (!userId) {
+        alert("User ID not found. Please log in again.");
+        return;
+      }
+
+      const res = await axios.patch(`/api/poolingrequests/${id}`, {
         status: "accepted",
-        acceptedBy: userId,
+        riderId: userId, // ✅ correct key
       });
 
-      // Optimistic update: mark the request accepted in UI
-      setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "accepted", acceptedBy: userId } : r)));
+      if (res.status === 200) {
+        alert("Ride accepted successfully!");
+        // Optimistic UI update
+        setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "accepted" } : r)));
+      } else {
+        alert(res.data?.message || "Could not accept ride.");
+      }
     } catch (err) {
-      console.error("Accept failed:", err);
-      alert("Could not accept request. Try again.");
+      console.error("Accept failed:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Could not accept request. Try again.");
     }
   };
 
-  // sample chart data kept simple (same as your earlier dashboard)
+  // ✅ Cancel pooling request
+  const handleCancel = async (id) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("User ID not found. Please log in again.");
+        return;
+      }
+
+      const res = await axios.patch(`/api/poolingrequests/${id}`, {
+        status: "cancelled",
+        riderId: userId, // ✅ use same key
+      });
+
+      if (res.status === 200) {
+        alert("Ride cancelled successfully!");
+        // Optimistic update for UI
+        setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "cancelled" } : r)));
+      } else {
+        alert(res.data?.message || "Could not cancel ride.");
+      }
+    } catch (err) {
+      console.error("Cancel failed:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Could not cancel the ride. Try again.");
+    }
+  };
+
+  // Dummy chart data (for visuals)
   const lineData = [
     { day: "Mon", Cost: 4000 },
     { day: "Tue", Cost: 3000 },
@@ -77,7 +122,7 @@ export default function PassengerDashboard() {
     <div className="p-6 bg-gray-900 min-h-screen text-white">
       <h1 className="text-2xl font-bold mb-6">Passenger Dashboard</h1>
 
-      {/* Top Stats (kept simple) */}
+      {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-gray-800 rounded-xl shadow p-6 flex items-center justify-between">
           <div>
@@ -109,7 +154,7 @@ export default function PassengerDashboard() {
         </div>
       </div>
 
-      {/* Car info + charts (kept from your original) */}
+      {/* Car Info + Charts */}
       <div className="flex flex-col md:flex-row gap-6 mb-8">
         <div className="md:w-1/3 bg-gray-800 rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-center">Car & Driver Info</h2>
@@ -170,7 +215,7 @@ export default function PassengerDashboard() {
         </div>
       </div>
 
-      {/* Pooling Requests (Passenger view — accept rides) */}
+      {/* Pooling Requests */}
       <div className="mt-10">
         <h2 className="text-xl font-semibold mb-4 text-green-400">Available Pooling Requests</h2>
 
@@ -179,7 +224,12 @@ export default function PassengerDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {requests.map((req) => (
-              <PassengerRequestAccept key={req._id} request={req} onAccept={handleAccept} />
+              <PassengerRequestAccept
+                key={req._id}
+                request={req}
+                onAccept={handleAccept}
+                onCancel={handleCancel}
+              />
             ))}
           </div>
         )}

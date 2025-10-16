@@ -4,16 +4,10 @@ import PoolingRequestMember from "@/models/PoolingRequestMember";
 import PoolingRequest from "@/models/PoolingRequest";
 import { authMiddleware } from "@/lib/auth";
 
-// GET all members for pooling requests
+// GET all members for pooling requests (only today's)
 export async function GET(req) {
   try {
     await dbConnect();
-
-    // const user = await authMiddlewa
-    // re(req);
-    // if (!user) {
-    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    // }
 
     const { searchParams } = new URL(req.url);
     const poolingRequestId = searchParams.get("poolingRequestId");
@@ -24,6 +18,13 @@ export async function GET(req) {
     if (poolingRequestId) query.poolingRequestId = poolingRequestId;
     if (userId) query.userId = userId;
     if (status) query.status = status;
+
+    // 🗓️ Filter only today's pooling requests
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    query.createdAt = { $gte: startOfDay, $lte: endOfDay };
 
     const members = await PoolingRequestMember.find(query)
       .populate("userId", "firstName lastName email phoneNumber profileImage")
@@ -117,57 +118,22 @@ export async function POST(req) {
     // Create member entry
     body.userId = user.userId;
     body.status = "pending";
-    
+
     const member = await PoolingRequestMember.create(body);
 
     const populatedMember = await PoolingRequestMember.findById(member._id)
       .populate("userId", "firstName lastName email phoneNumber")
       .populate("poolingRequestId", "fromLocation toLocation departureTime");
 
-    return NextResponse.json({
-      success: true,
-      message: "Request to join sent successfully",
-      data: populatedMember
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Request to join sent successfully",
+        data: populatedMember
+      },
+      { status: 201 }
+    );
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
-
-
-
-
-
-
-// export async function GET() {
-//   try {
-//     await dbConnect();
-
-
-//     const user = await authMiddleware(req);
-//       if (!user) {
-//         return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-//       }
-
-//     const items = await PoolingRequestMember.find({}).populate("RequestId UserId");
-//     return NextResponse.json(items);
-//   } catch (err) {
-//     return NextResponse.json({ error: err.message }, { status: 500 });
-//   }
-// }
-
-// export async function POST(req) {
-//   try {
-//     await dbConnect();
-//     const user = await authMiddleware(req);
-//       if (!user) {
-//         return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-//       }
-
-//     const body = await req.json();
-//     const created = await PoolingRequestMember.create(body);
-//     return NextResponse.json(created, { status: 201 });
-//   } catch (err) {
-//     return NextResponse.json({ error: err.message }, { status: 400 });
-//   }
-// }

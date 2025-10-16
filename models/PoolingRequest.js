@@ -16,7 +16,13 @@ const PoolingRequestSchema = new mongoose.Schema({
  createdOn: { type: Date, default: Date.now },
  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
  modifiedOn: Date,
- modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+ modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+acceptedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 export default mongoose.models.PoolingRequest || mongoose.model("PoolingRequest", PoolingRequestSchema);

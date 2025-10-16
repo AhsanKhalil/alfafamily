@@ -1,170 +1,89 @@
-import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import PoolingRequest from "@/models/PoolingRequest";
-import { authMiddleware } from "@/lib/auth";
+import PoolingRequestMember from "@/models/PoolingRequestMember";
+import { NextResponse } from "next/server";
 
-// GET single pooling request by ID
-export async function GET(req, { params }) {
+export async function PATCH(req, context) {
   try {
     await dbConnect();
 
-    // const user = await authMiddleware(req);
-    // if (!user) {
-    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    // }
-
-        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-    const { id } = params;
-    const poolingRequest = await PoolingRequest.findById(id)
-      .populate("userId", "firstName lastName email phoneNumber profileImage")
-      .populate("vehicleId", "plateNumber model make color year");
-
-    if (!poolingRequest) {
-      return NextResponse.json(
-        { error: "Pooling request not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: poolingRequest
-    });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
-
-// PUT - Update pooling request
-export async function PUT(req, { params }) {
-  try {
-    await dbConnect();
-
-    // const user = await authMiddleware(req);
-    // if (!user) {
-    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    // }
-
-
-        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-
-    const { id } = params;
+    // ✅ Await params for dynamic route
+    const { id } = await context.params;
     const body = await req.json();
+    const { status, riderId } = body;
+
+    if (!riderId) {
+      return NextResponse.json({ message: "riderId is required" }, { status: 400 });
+    }
 
     const poolingRequest = await PoolingRequest.findById(id);
     if (!poolingRequest) {
-      return NextResponse.json(
-        { error: "Pooling request not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Pooling request not found" }, { status: 404 });
     }
 
-    // Check ownership
-    if (poolingRequest.userId.toString() !== userId) {
-      return NextResponse.json(
-        { error: "Unauthorized to update this request" },
-        { status: 403 }
-      );
-    }
-
-    const updated = await PoolingRequest.findByIdAndUpdate(
-      id,
-      { ...body, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    )
-      .populate("userId", "firstName lastName email")
-      .populate("vehicleId", "plateNumber model");
-
-    return NextResponse.json({
-      success: true,
-      data: updated
+    // Check if rider already exists
+    let member = await PoolingRequestMember.findOne({
+      poolingRequestId: id,
+      userId: riderId,
     });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+
+    // ✅ Accept ride
+    if (status === "accepted") {
+      if (poolingRequest.availableSeats <= 0) {
+        return NextResponse.json({ message: "No seats available" }, { status: 400 });
+      }
+
+      if (member) {
+        return NextResponse.json({ message: "Already accepted this request" }, { status: 200 });
+      }
+
+      // Create new PoolingRequestMember entry
+      member = await PoolingRequestMember.create({
+        poolingRequestId: id,
+        userId: riderId,
+        seatsBooked: 1,
+        status: "accepted",
+        isaccepted: true,
+      });
+
+      poolingRequest.availableSeats -= 1;
+      if (poolingRequest.availableSeats === 0) poolingRequest.status = "full";
+      await poolingRequest.save();
+
+      return NextResponse.json({
+        message: "Ride accepted successfully",
+        member,
+        poolingRequest,
+      });
+    }
+
+    // ✅ Cancel ride
+    if (status === "cancelled") {
+      if (!member) {
+        return NextResponse.json({ message: "No active booking found" }, { status: 404 });
+      }
+
+      member.status = "cancelled";
+      member.isaccepted = false;
+      await member.save();
+
+      poolingRequest.availableSeats += 1;
+      if (poolingRequest.status === "full") poolingRequest.status = "active";
+      await poolingRequest.save();
+
+      return NextResponse.json({
+        message: "Ride cancelled successfully",
+        member,
+        poolingRequest,
+      });
+    }
+
+    return NextResponse.json({ message: "Invalid status action" }, { status: 400 });
+  } catch (error) {
+    console.error("PATCH error:", error);
+    return NextResponse.json(
+      { message: "Server error", error: error.message },
+      { status: 500 }
+    );
   }
 }
-
-// DELETE pooling request
-export async function DELETE(req, { params }) {
-  try {
-    await dbConnect();
-
-    // const user = await authMiddleware(req);
-    // if (!user) {
-    //   return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    // }
-
-
-        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-
-    const { id } = params;
-    const poolingRequest = await PoolingRequest.findById(id);
-
-    if (!poolingRequest) {
-      return NextResponse.json(
-        { error: "Pooling request not found" },
-        { status: 404 }
-      );
-    }
-
-    // Check ownership
-    if (poolingRequest.userId.toString() !== userId) {
-      return NextResponse.json(
-        { error: "Unauthorized to delete this request" },
-        { status: 403 }
-      );
-    }
-
-    await PoolingRequest.findByIdAndDelete(id);
-
-    return NextResponse.json({
-      success: true,
-      message: "Pooling request deleted successfully"
-    });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
-
-
-
-// export async function GET(req, { params }) {
-//   try {
-//     await dbConnect();
-
-
-//     const user = await authMiddleware(req);
-//       if (!user) {
-//         return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
-//       }
-
-//     const item = await PoolingRequest.findById(params.id).populate("UserId DriverId VehicleId");
-//     if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-//     return NextResponse.json(item);
-//   } catch (err) {
-//     return NextResponse.json({ error: err.message }, { status: 500 });
-//   }
-// }
-
-// export async function PUT(req, { params }) {
-//   try {
-//     await dbConnect();
-//     const body = await req.json();
-//     const updated = await PoolingRequest.findByIdAndUpdate(params.id, body, { new: true });
-//     if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
-//     return NextResponse.json(updated);
-//   } catch (err) {
-//     return NextResponse.json({ error: err.message }, { status: 400 });
-//   }
-// }
-
-// export async function DELETE(req, { params }) {
-//   try {
-//     await dbConnect();
-//     const deleted = await PoolingRequest.findByIdAndDelete(params.id);
-//     if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
-//     return NextResponse.json({ message: "Deleted" });
-//   } catch (err) {
-//     return NextResponse.json({ error: err.message }, { status: 500 });
-//   }
-// }

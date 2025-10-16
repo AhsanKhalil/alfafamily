@@ -1,27 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Clock, MapPin, CheckCircle } from "lucide-react";
+import { Users, Clock, MapPin } from "lucide-react";
 
-export default function PassengerRequestAccept({ request, onAccept }) {
+export default function PassengerRequestAccept({ request, onAccept, onCancel }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // consider a request accepted if backend status changed to "accepted"
-  const accepted =
-    request.status === "accepted" ||
-    request.status === "confirmed" ||
-    Boolean(request.acceptedBy);
+  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+
+  // Check if this user has already accepted the ride
+  const alreadyAccepted = request.acceptedMembers?.some(
+    (m) => String(m.userId) === String(userId) && m.status === "accepted"
+  );
+
+  const isCancelled = request.acceptedMembers?.some(
+    (m) => String(m.userId) === String(userId) && m.status === "cancelled"
+  );
+
+  // Disable accept if no seats left or already accepted
+  const disableAccept = alreadyAccepted || request.availableSeats <= 0 || request.status !== "active";
 
   const handleAccept = async () => {
-    if (accepted) return;
+    if (disableAccept) return;
     if (!confirm("Do you want to accept this ride request?")) return;
+
     try {
       setIsProcessing(true);
       await onAccept?.(request._id);
-      // parent updates the request state — we only handle UI state here.
     } catch (err) {
       console.error("Accept error:", err);
       alert("Failed to accept request. Try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!confirm("Do you want to cancel your participation in this ride?")) return;
+    try {
+      setIsProcessing(true);
+      await onCancel?.(request._id);
+    } catch (err) {
+      console.error("Cancel error:", err);
+      alert("Failed to cancel ride. Try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -41,6 +62,8 @@ export default function PassengerRequestAccept({ request, onAccept }) {
           className={`text-xs px-3 py-1 rounded-full ${
             request.status === "active"
               ? "bg-green-600/20 text-green-400 border border-green-500/40"
+              : request.status === "cancelled"
+              ? "bg-red-600/20 text-red-400 border border-red-500/40"
               : "bg-gray-700 text-gray-300 border border-gray-600"
           }`}
         >
@@ -81,25 +104,37 @@ export default function PassengerRequestAccept({ request, onAccept }) {
       {/* Divider */}
       <div className="h-px bg-gray-700 my-4"></div>
 
-      {/* Footer with Accept Button */}
+      {/* Footer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-gray-400">
           <MapPin className="w-4 h-4 text-green-400" />
           <span>{request.pickupLocation}</span>
         </div>
 
-        <div>
-          <button
-            onClick={handleAccept}
-            disabled={isProcessing || accepted || request.status !== "active"}
-            className={`px-4 py-2 font-semibold rounded-lg transition shadow-md ${
-              accepted || request.status !== "active"
-                ? "bg-gray-700 text-gray-300 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600 text-black"
-            }`}
-          >
-            {isProcessing ? "Accepting..." : accepted ? "Accepted ✓" : "Accept Ride"}
-          </button>
+        <div className="flex gap-2">
+          {!alreadyAccepted && request.status === "active" && (
+            <button
+              onClick={handleAccept}
+              disabled={isProcessing || disableAccept}
+              className={`px-4 py-2 font-semibold rounded-lg transition shadow-md ${
+                disableAccept
+                  ? "bg-gray-700 text-gray-300 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 text-black"
+              }`}
+            >
+              {isProcessing ? "Accepting..." : "Accept Ride"}
+            </button>
+          )}
+
+          {alreadyAccepted && (
+            <button
+              onClick={handleCancel}
+              disabled={isProcessing}
+              className="px-4 py-2 font-semibold rounded-lg transition shadow-md bg-red-500 hover:bg-red-600 text-black"
+            >
+              {isProcessing ? "Cancelling..." : "Cancel Ride"}
+            </button>
+          )}
         </div>
       </div>
     </div>
