@@ -2,18 +2,25 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
 const DriverDashboard = dynamic(() => import("./DriverDashboard"), { ssr: false });
 const RiderDashboard = dynamic(() => import("./RiderDashboard"), { ssr: false });
 
 export default function DashboardPage() {
   const [role, setRole] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchUserRole() {
       try {
         const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-        if (!userId) return;
+
+        // 🔴 If no userId, redirect to root path
+        if (!userId) {
+          router.push("/");
+          return;
+        }
 
         const res = await fetch(`/api/users/${userId}`);
         const data = await res.json();
@@ -27,7 +34,7 @@ export default function DashboardPage() {
     }
 
     fetchUserRole();
-  }, []);
+  }, [router]);
 
   if (!role) {
     return (

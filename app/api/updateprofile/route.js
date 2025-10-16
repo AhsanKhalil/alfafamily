@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import UserInformation from "@/models/UserInformation";
 import Employee from "@/models/Employee";
 import Vehicle from "@/models/Vehicle";
+import { logUserActivity } from "@/lib/logActivity";
 
 export async function PUT(req) {
   try {
@@ -70,6 +71,14 @@ export async function PUT(req) {
         { new: true, upsert: true }
       );
     }
+    await logUserActivity({
+  userId,
+  eventPerformed: "Profile Update",
+  activityDetail: "User updated profile information",
+  ipAddress: req.headers.get("x-forwarded-for"),
+  deviceInfo: req.headers.get("user-agent"),
+});
+
 
     return NextResponse.json({
       success: true,

@@ -120,7 +120,11 @@ export default function PassengerDashboard() {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-6">Passenger Dashboard</h1>
+
+       <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">
+        Passenger Dashboard
+      </h2>
+
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

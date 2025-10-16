@@ -1,12 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Import eye icons
 
 export default function RegisterDriver() {
   const [employees, setEmployees] = useState([]);
   const [employeeId, setEmployeeId] = useState("");
+  
+const [searchTerm, setSearchTerm] = useState("");
   const [employeeData, setEmployeeData] = useState({
     firstName: "",
     lastName: "",
@@ -184,29 +188,46 @@ export default function RegisterDriver() {
   return (
     <main className="bg-black text-white min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-5xl bg-gray-900 rounded-2xl shadow-2xl p-10 space-y-6">
-        <h1 className="text-3xl font-bold text-green-400 mb-4 text-center">
+        <h1 className="text-3xl font-bold text-yellow-400 mb-4 text-center">
           🚗 Register as Driver
         </h1>
 
         <form onSubmit={handleContinue} className="space-y-6">
           {/* Employee Dropdown */}
-          <div>
-            <label className="block text-yellow-400 mb-2 font-semibold">
-              Select Employee
-            </label>
-            <select
-              value={employeeId}
-              onChange={(e) => handleEmployeeSelect(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400 focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">-- Select Employee --</option>
-              {employees.map((emp) => (
-                <option key={emp._id} value={emp._id}>
-                  {emp.firstName} {emp.lastName} ({emp.empid})
-                </option>
-              ))}
-            </select>
-          </div>
+         {/* Searchable Employee Dropdown */}
+<div>
+  <label className="block text-yellow-400 mb-2 font-semibold">
+    Select Employee
+  </label>
+
+  {/* Search Field */}
+  <input
+    type="text"
+    placeholder="Search by name or empid..."
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full mb-2 px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400 focus:ring-2 focus:ring-green-500"
+  />
+
+  <select
+    value={employeeId}
+    onChange={(e) => handleEmployeeSelect(e.target.value)}
+    className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-green-400 focus:ring-2 focus:ring-green-500"
+  >
+    <option value="">-- Select Employee --</option>
+    {employees
+      .filter((emp) =>
+        `${emp.firstName} ${emp.lastName} ${emp.empid}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+      .map((emp) => (
+        <option key={emp._id} value={emp._id}>
+          {emp.firstName} {emp.lastName} ({emp.empid})
+        </option>
+      ))}
+  </select>
+</div>
+
 
           {/* Employee Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,7 +263,7 @@ export default function RegisterDriver() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 cursor-pointer text-green-400"
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </span>
             </div>
 
@@ -260,7 +281,7 @@ export default function RegisterDriver() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-3 cursor-pointer text-green-400"
               >
-                {showConfirmPassword ? "👁️" : "🙈"}
+                {showConfirmPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </span>
             </div>
           </div>

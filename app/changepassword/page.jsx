@@ -1,169 +1,186 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import Swal from "sweetalert2";
 
-export default function ChangePasswordPage() {
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function ChangePassword() {
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [userId, setUserId] = useState("");
 
-  // separate visibility states for each field
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-
-    if (newPassword !== confirmPassword) {
-      Swal.fire({
-        icon: "error",
-        title: "Password Mismatch",
-        text: "New passwords do not match!",
-        confirmButtonColor: "#ef4444",
-        background: "#1f2937",
-        color: "#fff",
-      });
-      return;
+  // ✅ safely get userId from localStorage (client side only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserId = localStorage.getItem("userId");
+      setUserId(storedUserId || "");
     }
+  }, []);
 
-    setLoading(true);
+  // ✅ Yup validation schema
+  const validationSchema = Yup.object().shape({
+    oldPassword: Yup.string().required("Old password is required"),
+    password: Yup.string()
+      .required("New password is required")
+      .min(8, "Must be at least 8 characters")
+      .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Must contain at least one lowercase letter")
+      .matches(/[0-9]/, "Must contain at least one number")
+      .matches(/[@$!%*?&#]/, "Must contain at least one special character"),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("Confirm password is required"),
+  });
 
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) throw new Error("User not logged in");
-
-      const res = await fetch("/api/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, oldPassword, newPassword }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        Swal.fire({
-          icon: "success",
-          title: "Password Updated!",
-          text: "Your password has been changed successfully.",
-          confirmButtonColor: "#10b981",
-          background: "#1f2937",
-          color: "#fff",
-        });
-
-        // reset form
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
+  const formik = useFormik({
+    initialValues: {
+      oldPassword: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationSchema,
+    onSubmit: async (values, { resetForm }) => {
+      if (!userId) {
         Swal.fire({
           icon: "error",
-          title: "Update Failed",
-          text: data.error || "Something went wrong!",
-          confirmButtonColor: "#ef4444",
-          background: "#1f2937",
-          color: "#fff",
+          title: "Error",
+          text: "User ID not found. Please log in again.",
+        });
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/changepassword", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            oldPassword: values.oldPassword,
+            newPassword: values.password,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: data.error || "Failed to update password",
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: "success",
+          title: "Password Changed!",
+          text: "Your password has been updated successfully.",
+          timer: 2500,
+          showConfirmButton: false,
+        });
+
+        resetForm();
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Something went wrong",
+          text: err.message || "Please try again later.",
         });
       }
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err.message,
-        confirmButtonColor: "#ef4444",
-        background: "#1f2937",
-        color: "#fff",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#111827]">
-      <div className="w-full max-w-md bg-gray-900 text-gray-100 shadow-xl rounded-2xl p-8 border border-gray-700">
-        <h2 className="text-3xl font-bold text-center mb-6 text-green-400">
-          Change Password
-        </h2>
+    <div className="max-w-md mx-auto bg-gray-900 text-white p-6 rounded-2xl shadow-lg mt-10">
+      <h2 className="text-2xl font-bold text-center mb-6 text-green-400">
+        Change Password
+      </h2>
 
-        <form onSubmit={handleChangePassword} className="space-y-5">
-
-          {/* Old Password */}
-          <div className="relative">
-            <label className="block text-sm text-gray-400 mb-1">
-              Old Password
-            </label>
-            <input
-              type={showOldPassword ? "text" : "password"}
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              required
-              className="w-full p-3 pr-10 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <span
-              onClick={() => setShowOldPassword(!showOldPassword)}
-              className="absolute right-3 top-[50%] translate-y-1 cursor-pointer text-green-400 text-lg"
-            >
-              {showOldPassword ? "👁️" : "🙈"}
-            </span>
-          </div>
-
-          {/* New Password */}
-          <div className="relative">
-            <label className="block text-sm text-gray-400 mb-1">
-              New Password
-            </label>
-            <input
-              type={showNewPassword ? "text" : "password"}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              className="w-full p-3 pr-10 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <span
-              onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-[50%] translate-y-1 cursor-pointer text-green-400 text-lg"
-            >
-              {showNewPassword ? "👁️" : "🙈"}
-            </span>
-          </div>
-
-          {/* Confirm Password */}
-          <div className="relative">
-            <label className="block text-sm text-gray-400 mb-1">
-              Confirm Password
-            </label>
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full p-3 pr-10 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <span
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-[50%] translate-y-1 cursor-pointer text-green-400 text-lg"
-            >
-              {showConfirmPassword ? "👁️" : "🙈"}
-            </span>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold transition duration-200 ${
-              loading
-                ? "bg-gray-600 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700 text-white"
-            }`}
+      <form onSubmit={formik.handleSubmit} className="space-y-5">
+        {/* Old Password */}
+        <div className="relative">
+          <label className="block text-sm mb-2">Old Password</label>
+          <input
+            type={showOld ? "text" : "password"}
+            name="oldPassword"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.oldPassword}
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 outline-none"
+            placeholder="Enter old password"
+          />
+          <span
+            onClick={() => setShowOld(!showOld)}
+            className="absolute right-3 top-9 cursor-pointer text-green-400 select-none"
           >
-            {loading ? "Updating..." : "Update Password"}
-          </button>
-        </form>
-      </div>
+            {showOld ? "👁️" : "🙈"}
+          </span>
+          {formik.touched.oldPassword && formik.errors.oldPassword && (
+            <p className="text-red-500 text-sm mt-1">
+              {formik.errors.oldPassword}
+            </p>
+          )}
+        </div>
+
+        {/* New Password */}
+        <div className="relative">
+          <label className="block text-sm mb-2">New Password</label>
+          <input
+            type={showNew ? "text" : "password"}
+            name="password"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.password}
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 outline-none"
+            placeholder="Enter new password"
+          />
+          <span
+            onClick={() => setShowNew(!showNew)}
+            className="absolute right-3 top-9 cursor-pointer text-green-400 select-none"
+          >
+            {showNew ? "👁️" : "🙈"}
+          </span>
+          {formik.touched.password && formik.errors.password && (
+            <p className="text-red-500 text-sm mt-1">
+              {formik.errors.password}
+            </p>
+          )}
+        </div>
+
+        {/* Confirm Password */}
+        <div className="relative">
+          <label className="block text-sm mb-2">Confirm Password</label>
+          <input
+            type={showConfirm ? "text" : "password"}
+            name="confirmPassword"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.confirmPassword}
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-500 outline-none"
+            placeholder="Confirm new password"
+          />
+          <span
+            onClick={() => setShowConfirm(!showConfirm)}
+            className="absolute right-3 top-9 cursor-pointer text-green-400 select-none"
+          >
+            {showConfirm ? "👁️" : "🙈"}
+          </span>
+          {formik.touched.confirmPassword &&
+            formik.errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">
+                {formik.errors.confirmPassword}
+              </p>
+            )}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold mt-4 transition-all"
+        >
+          Change Password
+        </button>
+      </form>
     </div>
   );
 }
